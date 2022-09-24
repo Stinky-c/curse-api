@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "curse-api"
+version = "0.1.0"
+description = "A simple curseforge api wrapper"
+authors = ["Stinky-c <60587749+Stinky-c@users.noreply.github.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+chili = "^1.7.1"
+requests = "^2.28.1"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
