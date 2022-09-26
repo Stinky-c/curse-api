@@ -8,6 +8,7 @@ Built to serve CF endpoints while providing methods and functions to assist in f
 
 - [Features](#features)
 - [Quick Start](#quickstart)
+- [Examples](#examples)
 
 ----
 
@@ -35,7 +36,7 @@ Currently implemented:
 
 TODO:
 
-- switch to httpx
+- fully expose needed httpx args
 - write more dataclass download handling code
 - switch to a custom API factory
 - write tests
@@ -53,6 +54,7 @@ Missing:
 ### Quickstart
 
 Requires an api from CF to use the API. You can get one [here](https://docs.curseforge.com/#authentication).
+This example runs through most of the basics
 
 ```python
 from curse_api import CurseAPI
@@ -85,6 +87,8 @@ forge = api.get_specific_minecraft_modloader("forge-36.2.39") # returns forge re
 
 ### Downloading to a file
 
+This example opens a properly named file in the current working directory and writes to it.
+
 ```python
 from curse_api import CurseAPI
 
@@ -95,6 +99,38 @@ latest = mod_l[0].latestFiles[0] # gets the first mod matching the slug "jei" an
 
 with open(latest.fileName, "wb") as f:
     f.write(latest.download()) # download returns bytes while kwargs is passed to the get method
+
+```
+
+### Custom hooks and http client settings
+
+Here we configure some settings on our http client and setup some event hooks.
+
+Method calls that result in an api call will always raise for status
+
+```python
+from curse_api import CurseAPI
+
+api = CurseAPI(API_KEY)
+
+# setting httpx client timeout to 30 seconds
+api._sess.timeout = 30
+print(api._sess.timeout)
+
+# setting response and request hooks
+def log(obj):
+    print(obj, type(obj))
+
+
+api.set_request_hook(log)
+api.set_response_hook(log)
+
+api.get_mod(285109)
+
+# remove all request and response hooks
+# returns the functions
+api.pop_request_hooks()
+api.pop_response_hooks()
 
 ```
 

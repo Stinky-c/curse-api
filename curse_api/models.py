@@ -2,41 +2,31 @@ from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Any, List, Optional
-import requests as req
 
-from .enums import *
-from .exceptions import *
+import httpx
+
+from .enums import (
+    CoreApiStatus,
+    CoreStatus,
+    FileRelationType,
+    FileReleaseType,
+    FileStatus,
+    GameVersionStatus,
+    GameVersionTypeStatus,
+    HashAlgo,
+    ModLoaderInstallMethod,
+    ModLoaderType,
+    ModStatus,
+)
 
 """
 schemas can be found at https://docs.curseforge.com/#schemas
 If exceptions to the format or naming conventions there will be a comment detailing the change
 """
 
-
+# TODO: rewrite download handling code
 class BaseRequest:
-    @staticmethod
-    def _raise(status_code: int):
-        match status_code:
-            case 200:
-                return True
-            case 400:
-                raise BadRequest(
-                    "The server cannot or will not process the request due to something that is perceived to be a client error."
-                )
-            case 403:
-                raise Forbidden("The client does not have access rights to the content")
-            case 404:
-                raise NotFound("The server can not find the requested resource.")
-            case 500:
-                raise InternalServerError(
-                    "The server has encountered a situation it does not know how to handle."
-                )
-            case 418:
-                raise ImATeapot(
-                    "The server refuses to brew coffee because it is, permanently, a teapot."
-                )
-            case _:
-                raise Exception(f"I don't know what went wrong")
+    pass
 
 
 # misc
@@ -84,15 +74,15 @@ class MinecraftGameVersion(BaseRequest):
     gameVersionTypeStatus: GameVersionTypeStatus
 
     def _download(self, url, **kwargs):
-        res = req.get(url, **kwargs)
-        if self._raise(res.status_code):
-            return res.content
+        res = httpx.get(url, **kwargs)
+        res.raise_for_status()
+        return res.content
 
     def download_jar(self, **kwargs) -> bytes:
-        self._download(self.jarDownloadUrl, **kwargs)
+        return self._download(self.jarDownloadUrl, **kwargs)
 
     def download_json(self, **kwargs) -> bytes:
-        self._download(self.jsonDownloadUrl, **kwargs)
+        return self._download(self.jsonDownloadUrl, **kwargs)
 
 
 @dataclass(slots=True)
@@ -106,7 +96,9 @@ class MinecraftModLoaderIndex:
     type: Optional[ModLoaderType]
 
     def get(self, headers: dict, url: str = "https://api.curseforge.com"):
-        res = req.get(url + f"/v1/minecraft/modloader/{self.name}")
+        res = httpx.get(url + f"/v1/minecraft/modloader/{self.name}")
+        res.raise_for_status()
+        return res
 
 
 @dataclass(slots=True)
@@ -141,15 +133,12 @@ class MinecraftModLoaderVersion(BaseRequest):
     installProfileJson: str
 
     def download(self, **kwargs) -> bytes:  # download
-        res = req.get(self.downloadUrl, **kwargs)
-        if self._raise(res.status_code):
-            return res.content
+        res = httpx.get(self.downloadUrl, **kwargs)
+        res.raise_for_status()
+        return res.content
 
     def install(self, path: Path) -> Path:  # TODO download to path
-        return
-        install_loc = self.librariesInstallLocation
-        self.download()
-        pass
+        raise NotImplementedError
 
 
 # file
@@ -219,9 +208,9 @@ class File(BaseRequest):
 
     def download(self, **kwargs) -> bytes:
         """Kwargs is passed to requests.get"""
-        res = req.get(self.downloadUrl, **kwargs)
-        if self._raise(res.status_code):
-            return res.content
+        res = httpx.get(self.downloadUrl, **kwargs)
+        res.raise_for_status
+        return res.content
 
 
 @dataclass(slots=True)
@@ -291,13 +280,6 @@ class Game:
     assets: GameAssets
     status: CoreStatus
     apiStatus: CoreApiStatus
-
-
-# @dataclass(slots=True)
-# class GameVersionsByType:
-#     """https://docs.curseforge.com/#tocS_GameVersionsByType"""
-#     type: int
-#     versions: List[str]
 
 
 @dataclass(slots=True)
@@ -373,9 +355,9 @@ class Mod(BaseRequest):
     thumbsUpCount: int
 
     def download_latest(self, **kwargs) -> bytes:
-        res = req.get(self.latestFiles[0].downloadUrl, **kwargs)
-        if self._raise(res.status_code):
-            return res.content
+        res = httpx.get(self.latestFiles[0].downloadUrl, **kwargs)
+        res.raise_for_status()
+        return res.content
 
 
 # misc
