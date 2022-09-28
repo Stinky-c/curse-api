@@ -11,6 +11,7 @@ chili = "^1.7.1"
 httpx = "^0.23.0"
 
 [tool.poetry.dev-dependencies]
+python-dotenv = "^0.21.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

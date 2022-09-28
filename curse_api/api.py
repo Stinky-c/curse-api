@@ -24,6 +24,7 @@ from .models import (
 """
 TODO
     make important methods private
+    expose more client options
 """
 
 
@@ -48,7 +49,7 @@ class APIFactory:
         res = self._sess.get(url, params=params, **kwargs)
         return res
 
-    def _post(self, url: str, params=None, **kwargs) -> httpx.Response:
+    def _post(self, url: str, params: dict = None, **kwargs) -> httpx.Response:
         """internal post method
 
         Args:
@@ -58,6 +59,10 @@ class APIFactory:
         """
         res = self._sess.post(url, json=params, **kwargs)
         return res
+
+    @property
+    def session(self):
+        return self._sess
 
     def set_request_hook(self, func: Callable):
         """
@@ -96,6 +101,30 @@ class APIFactory:
         )
         return r
 
+    @property
+    def response_hooks(self) -> list[Callable]:
+        """response event hooks"""
+        return self._sess.event_hooks["response"]
+
+    @property
+    def request_hooks(self) -> list[Callable]:
+        """request event hooks"""
+        return self._sess.event_hooks["request"]
+
+    @property
+    def client_timeout(self) -> httpx.Timeout:
+        return self._sess.timeout
+
+    def set_client_timeout(
+        self, read: float = 5, connect: float = 5, pool: float = 5, default: float = 5
+    ):
+        """Sets the clients timeouts
+        https://www.python-httpx.org/advanced/#timeout-configuration
+        """
+        self._sess.timeout = httpx.Timeout(
+            default, read=read, connect=connect, pool=pool
+        )
+
 
 class CurseAPI(APIFactory):
     """The main class for api requests
@@ -120,12 +149,6 @@ class CurseAPI(APIFactory):
         """
 
         self.extra_data = extra_data
-
-    # def _get(self, *args, **kwargs):
-    #     return self._api._get(*args, **kwargs)
-
-    # def _post(self, *args, **kwargs):
-    #     return self._api._post(*args, **kwargs)
 
     def health_check(self) -> httpx.Response:
         res = self._get("/")

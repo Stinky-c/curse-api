@@ -7,7 +7,7 @@
 Built to serve CF endpoints while providing methods and functions to assist in finding the right mod.
 
 - [Features](#features)
-- [Quick Start](#quickstart)
+- [Quick Start](#quick-start)
 - [Examples](#examples)
 
 ----
@@ -25,7 +25,7 @@ I decided that this simple-ish api wrapper would be the first step to a Modpack 
 Main Dependencies:
 
 - [Chili](https://pypi.org/project/chili/)
-- [Requests](https://pypi.org/project/requests/)
+- [HTTPX](https://pypi.org/project/httpx/)
 
 Currently implemented:
 
@@ -46,12 +46,13 @@ Missing:
 - multi-game support - mostly only works for Minecraft
 - no downloading of api banned mods
 - lack of docs
+- exceptional exception handling
 
 ----
 
 ## Examples
 
-### Quickstart
+### Quick start
 
 Requires an api from CF to use the API. You can get one [here](https://docs.curseforge.com/#authentication).
 This example runs through most of the basics
@@ -126,6 +127,10 @@ api.set_request_hook(log)
 api.set_response_hook(log)
 
 api.get_mod(285109)
+
+# print the current hooks
+print("request hooks", api.request_hooks)
+print("request hooks", api.response_hooks)
 
 # remove all request and response hooks
 # returns the functions

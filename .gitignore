@@ -83,3 +83,4 @@ scripts/
 .vscode/
 .ignored/
 tests/
+examples/
