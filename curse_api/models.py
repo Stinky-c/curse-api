@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, List, Optional
-
+from typing import Any, Generator, Iterator, List, Optional
+import arrow
 import httpx
 
 from .enums import (
@@ -25,8 +25,17 @@ If exceptions to the format or naming conventions there will be a comment detail
 """
 
 # TODO: rewrite download handling code
+# File
+# Modloader
+# minecraft Game Version
 class BaseRequest:
-    pass
+    def _download(self, url, **kwargs) -> bytes:
+        """Kwargs is passed to httpx.get"""
+        if url is None:
+            raise Exception("URL is unavailable")
+        res = httpx.get(url, follow_redirects=True, **kwargs)
+        res.raise_for_status()
+        return res.content
 
 
 # misc
@@ -72,11 +81,6 @@ class MinecraftGameVersion(BaseRequest):
     gameVersionTypeId: int
     gameVersionStatus: GameVersionStatus
     gameVersionTypeStatus: GameVersionTypeStatus
-
-    def _download(self, url, **kwargs):
-        res = httpx.get(url, **kwargs)
-        res.raise_for_status()
-        return res.content
 
     def download_jar(self, **kwargs) -> bytes:
         return self._download(self.jarDownloadUrl, **kwargs)
@@ -194,7 +198,7 @@ class File(BaseRequest):
     fileDate: datetime
     fileLength: int
     downloadCount: int
-    downloadUrl: str
+    downloadUrl: str | None
     gameVersions: List[str]
     sortableGameVersions: List[SortableGameVersion]
     dependencies: List[FileDependency]
@@ -207,10 +211,7 @@ class File(BaseRequest):
     modules: List[FileModule]
 
     def download(self, **kwargs) -> bytes:
-        """Kwargs is passed to requests.get"""
-        res = httpx.get(self.downloadUrl, **kwargs)
-        res.raise_for_status
-        return res.content
+        return self._download(self.downloadUrl, **kwargs)
 
 
 @dataclass(slots=True)
@@ -355,9 +356,9 @@ class Mod(BaseRequest):
     thumbsUpCount: int
 
     def download_latest(self, **kwargs) -> bytes:
-        res = httpx.get(self.latestFiles[0].downloadUrl, **kwargs)
-        res.raise_for_status()
-        return res.content
+        if len(self.latestFiles) == 0:
+            raise Exception("")
+        return self._download(self.latestFiles[0].downloadUrl)
 
 
 # misc

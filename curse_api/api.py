@@ -22,9 +22,9 @@ from .models import (
 )
 
 """
-TODO
-    make important methods private
-    expose more client options
+TODO: make important methods private
+TODO: expose more client options
+IDEA: make APIFactory a class with methods and class variables
 """
 
 
