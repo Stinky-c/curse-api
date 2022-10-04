@@ -1,8 +1,7 @@
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Generator, Iterator, List, Optional
-import arrow
+from typing import Any, List, Optional
 import httpx
 
 from .enums import (
@@ -350,9 +349,9 @@ class Mod(BaseRequest):
     dateCreated: datetime
     dateModified: datetime
     dateReleased: datetime
-    allowModDistribution: bool | None
+    allowModDistribution: bool | None  # API status
     gamePopularityRank: int
-    isAvailable: bool
+    isAvailable: bool  # search status
     thumbsUpCount: int
 
     def download_latest(self, **kwargs) -> bytes:

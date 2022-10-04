@@ -34,11 +34,11 @@ Currently implemented:
 - mediocre error handling
 - shortcuts to download mods
 
-TODO:
+Ideas:
 
 - fully expose needed httpx args
 - write more dataclass download handling code
-- switch to a custom API factory
+- switch to a pluggable API factory
 - write tests
 
 Missing:
@@ -70,7 +70,7 @@ mod = api.get_mod(3358) # returns a singular Mod
 mod_list = api.get_mods([285109, 238222]) # returns a list of Mods
 
 
-"files"  # TODO finish file support
+"files"
 files = api.get_files([3940240]) # returns a list of Files matching their id
 mod_files = api.get_mod_files(238222) # returns all the Files of on a give Mod
 

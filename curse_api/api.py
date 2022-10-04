@@ -22,18 +22,18 @@ from .models import (
 )
 
 """
-TODO: make important methods private
-TODO: expose more client options
-IDEA: make APIFactory a class with methods and class variables
+TODO: write more doc strings
+IDEA: make APIFactory a class with class methods and class variables
 """
 
 
 class APIFactory:
-    def __init__(self, API_KEY: str, base_url: str) -> None:
+    def __init__(self, api_key: str, base_url: str, user_agent: str) -> None:
         _headers = {
-            "X-API-KEY": API_KEY,
+            "X-API-KEY": api_key,
             "Content-Type": "application/json",
             "Accept": "application/json",
+            "user-agent": user_agent,
         }
 
         self._sess = httpx.Client(base_url=base_url, headers=_headers)
@@ -134,11 +134,12 @@ class CurseAPI(APIFactory):
 
     def __init__(
         self,
-        API_KEY: str,
-        API_BASE: str = "https://api.curseforge.com",
+        api_key: str,
+        api_base: str = "https://api.curseforge.com",
+        user_agent: str = "stinky-c/curse-api",
         extra_data: Any = None,
     ) -> None:
-        super().__init__(API_KEY, API_BASE)
+        super().__init__(api_key, api_base, user_agent=user_agent)
         """The main factory for handling requests
 
         Args:
@@ -277,7 +278,7 @@ class CurseAPI(APIFactory):
         gameVersionTypeId: int = None,
         index: int = 0,
         pageSize: int = 50,
-    ) -> list[File]:
+    ) -> tuple[list[File], Pagination]:
         res = self._get(
             f"/v1/mods/{modId}/files",
             params={
@@ -289,7 +290,10 @@ class CurseAPI(APIFactory):
             },
         )
         res.raise_for_status()
-        return [init_dataclass(x, File) for x in res.json()["data"]]
+        d = res.json()
+        return [init_dataclass(x, File) for x in d["data"]], init_dataclass(
+            d["pagination"], Pagination
+        )
 
     def get_mod_file(self, modId: int, fileId: int) -> File:
         res = self._get(f"/v1/mods/{modId}/files/{fileId}")
