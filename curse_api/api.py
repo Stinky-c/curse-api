@@ -28,7 +28,7 @@ IDEA: make APIFactory a class with class methods and class variables
 
 
 class APIFactory:
-    def __init__(self, api_key: str, base_url: str, user_agent: str) -> None:
+    def __init__(self, api_key: str, base_url: str, user_agent: str,**settings) -> None:
         _headers = {
             "X-API-KEY": api_key,
             "Content-Type": "application/json",
@@ -36,7 +36,7 @@ class APIFactory:
             "user-agent": user_agent,
         }
 
-        self._sess = httpx.Client(base_url=base_url, headers=_headers)
+        self._sess = httpx.Client(base_url=base_url, headers=_headers,**settings)
 
     def _get(self, url: str, params: dict = None, **kwargs) -> httpx.Response:
         """internal get method
@@ -126,7 +126,7 @@ class APIFactory:
         )
 
 
-class CurseAPI(APIFactory):
+class CurseAPI:
     """The main class for api requests
     Cannot handle the download of API banned mods
 
@@ -135,50 +135,56 @@ class CurseAPI(APIFactory):
     def __init__(
         self,
         api_key: str,
-        api_base: str = "https://api.curseforge.com",
+        base_url: str = "https://api.curseforge.com",
         user_agent: str = "stinky-c/curse-api",
-        extra_data: Any = None,
+        factory: APIFactory = APIFactory,
+        **settings,
     ) -> None:
-        super().__init__(api_key, api_base, user_agent=user_agent)
+        self._api: APIFactory = factory(
+            api_key=api_key, base_url=base_url, user_agent=user_agent, **settings
+        )
         """The main factory for handling requests
+        accepts additional kwargs passing to the creation of the factory
 
         Args:
             API_KEY (str): Required. get one from here: https://docs.curseforge.com/#accessing-the-service.
             API_BASE (str, optional): An overide of the url base. Defaults to "https://api.curseforge.com".
-            headers_overide (dict, optional): headers to overide the default. Defaults to None.
-            extra_data (any, optional): any extra data
+            user_agent (str, optional): user_agent used for requests. Defaults to "stinky-c/curse-api".
+            factory (APIFactory): a factory for handling API requests Defaults to APIFactory.
         """
 
-        self.extra_data = extra_data
+    @property
+    def api(self):
+        return self._api
 
-    def health_check(self) -> httpx.Response:
-        res = self._get("/")
+    def health_check(self,**k) -> httpx.Response:
+        res = self._api._get("/")
         return res
 
     @cache
     def minecraft_versions(self) -> list[MinecraftGameVersion]:
-        res = self._get("/v1/minecraft/version")
+        res = self._api._get("/v1/minecraft/version")
         res.raise_for_status()
         return [init_dataclass(x, MinecraftGameVersion) for x in res.json()["data"]]
 
     def get_specific_minecraft_version(
         self, gameVersionString: str
     ) -> MinecraftGameVersion:
-        res = self._get(f"/v1/minecraft/version/{gameVersionString}")
+        res = self._api._get(f"/v1/minecraft/version/{gameVersionString}")
         res.raise_for_status()
         return init_dataclass(res.json()["data"], MinecraftGameVersion)
 
     @cache
     def modloader_versions(self) -> list[MinecraftModLoaderIndex]:
         # very big data
-        res = self._get("/v1/minecraft/modloader")
+        res = self._api._get("/v1/minecraft/modloader")
         res.raise_for_status()
         return [init_dataclass(x, MinecraftModLoaderIndex) for x in res.json()["data"]]
 
     def get_specific_minecraft_modloader(
         self, modLoaderName: str
     ) -> MinecraftModLoaderVersion:
-        res = self._get(f"/v1/minecraft/modloader/{modLoaderName}")
+        res = self._api._get(f"/v1/minecraft/modloader/{modLoaderName}")
         res.raise_for_status()
         return init_dataclass(res.json()["data"], MinecraftModLoaderVersion)
 
@@ -232,7 +238,7 @@ class CurseAPI(APIFactory):
             "pageSize": pageSize,
         }
 
-        res = self._get(
+        res = self._api._get(
             "/v1/mods/search",
             params={k: v for k, v in build.items() if v is not None},
         )
@@ -243,17 +249,17 @@ class CurseAPI(APIFactory):
         )
 
     def get_mod(self, modId: int) -> Mod:
-        res = self._get(f"/v1/mods/{modId}")
+        res = self._api._get(f"/v1/mods/{modId}")
         res.raise_for_status()
         return init_dataclass(res.json()["data"], Mod)
 
     def get_mods(self, modIdList: list[int]) -> list[Mod]:
-        res = self._post("/v1/mods", params={"modIds": modIdList})
+        res = self._api._post("/v1/mods", params={"modIds": modIdList})
         res.raise_for_status()
         return [init_dataclass(x, Mod) for x in res.json()["data"]]
 
     def get_mod_description(self, modId: int) -> str:
-        res = self._get(f"/v1/mods/{modId}/description")
+        res = self._api._get(f"/v1/mods/{modId}/description")
         res.raise_for_status()
         return res.json()["data"]
 
@@ -261,12 +267,12 @@ class CurseAPI(APIFactory):
         """Only supports addons.
         Minecraft modpacks do not function
         I dont really know a use for this, but I can easily support it."""
-        res = self._post("/v1/fingerprints", params={"fingerprints": fingerprints})
+        res = self._api._post("/v1/fingerprints", params={"fingerprints": fingerprints})
         res.raise_for_status()
         return init_dataclass(res.json()["data"], FingerprintsMatchesResult)
 
     def get_files(self, fileList: list[int]) -> list[File]:
-        res = self._post("/v1/mods/files", params={"fileIds": fileList})
+        res = self._api._post("/v1/mods/files", params={"fileIds": fileList})
         res.raise_for_status()
         return [init_dataclass(x, File) for x in res.json()["data"]]
 
@@ -279,7 +285,7 @@ class CurseAPI(APIFactory):
         index: int = 0,
         pageSize: int = 50,
     ) -> tuple[list[File], Pagination]:
-        res = self._get(
+        res = self._api._get(
             f"/v1/mods/{modId}/files",
             params={
                 "gameVersion": gameVersion,
@@ -296,16 +302,16 @@ class CurseAPI(APIFactory):
         )
 
     def get_mod_file(self, modId: int, fileId: int) -> File:
-        res = self._get(f"/v1/mods/{modId}/files/{fileId}")
+        res = self._api._get(f"/v1/mods/{modId}/files/{fileId}")
         res.raise_for_status()
         return init_dataclass(res.json()["data"], File)
 
     def get_mod_file_changelog(self, modId: int, fileId: int) -> str:
-        res = self._get(f"/v1/mods/{modId}/files/{fileId}/changelog")
+        res = self._api._get(f"/v1/mods/{modId}/files/{fileId}/changelog")
         res.raise_for_status()
         return res.json()["data"]
 
     def get_mod_file_download_url(self, modId: int, fileId: int) -> str:
-        res = self._get(f"/v1/mods/{modId}/files/{fileId}/download-url")
+        res = self._api._get(f"/v1/mods/{modId}/files/{fileId}/download-url")
         res.raise_for_status()
         return res.json()["data"]

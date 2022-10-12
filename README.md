@@ -33,12 +33,12 @@ Currently implemented:
 - full if not most dataclass support
 - mediocre error handling
 - shortcuts to download mods
+- pluggable API factory
 
 Ideas:
 
 - fully expose needed httpx args
 - write more dataclass download handling code
-- switch to a pluggable API factory
 
 Missing:
 
@@ -108,47 +108,11 @@ with open(latest.fileName, "wb") as f:
 
 ```
 
-### Custom hooks and http client settings
-
-Here we configure some settings on our http client and setup some event hooks.
-
-Method calls that result in an api call will always raise for status
-
-```python
-from curse_api import CurseAPI
-
-api = CurseAPI(API_KEY)
-
-# setting httpx client timeout to 30 seconds
-api._sess.timeout = 30
-print(api._sess.timeout)
-
-# setting response and request hooks
-def log(obj):
-    print(obj, type(obj))
-
-
-api.set_request_hook(log)
-api.set_response_hook(log)
-
-api.get_mod(285109)
-
-# print the current hooks
-print("request hooks", api.request_hooks)
-print("request hooks", api.response_hooks)
-
-# remove all request and response hooks
-# returns the functions
-api.pop_request_hooks()
-api.pop_response_hooks()
-
-```
-
 ----
 sub project ideas:
 
 - write modloader downloading everything
-- enum for mc versions?
+- enum/parser for mc versions?
 - download from manifest
 - download pack and unzip
 - DB cache of mods and files
