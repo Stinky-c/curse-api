@@ -39,7 +39,6 @@ Ideas:
 - fully expose needed httpx args
 - write more dataclass download handling code
 - switch to a pluggable API factory
-- write tests
 
 Missing:
 
@@ -47,6 +46,12 @@ Missing:
 - no downloading of api banned mods
 - lack of docs
 - exceptional exception handling
+
+CI/CD:
+
+- type checking
+- version testing
+- tests
 
 ----
 
