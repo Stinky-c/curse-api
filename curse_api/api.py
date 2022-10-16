@@ -1,8 +1,8 @@
 from functools import cache
-from typing import Any, Callable, List
+from typing import Any, Callable, List, Optional, Type
 
-import httpx
-from chili import init_dataclass
+import httpx  # type: ignore
+from chili import init_dataclass  # type: ignore
 
 from .enums import (
     Games,
@@ -28,17 +28,38 @@ IDEA: make APIFactory a class with class methods and class variables
 
 
 class APIFactory:
-    def __init__(self, api_key: str, base_url: str, user_agent: str,**settings) -> None:
+    def __init__(
+        self, api_key: str, base_url: str, user_agent: str, **settings
+    ) -> None:
+        """A basic factory handling API requests
+            CurseAPI will accept a subclass, but have `_get` and `_post` methods
+
+
+        Args:
+            api_key (str): A valid CurseForge API key
+            base_url (str): The base URL for handling requests
+            user_agent (str): A user agent for requests
+            settings: extra httpx settings
+        """
+
         _headers = {
             "X-API-KEY": api_key,
             "Content-Type": "application/json",
             "Accept": "application/json",
             "user-agent": user_agent,
         }
+        self._sess = httpx.Client(
+            base_url=base_url,
+            headers=_headers,
+            **settings,
+        )
+        # read timeout overide because getting json data takes a while some times
+        # switch to different json parser?
+        todict = self._sess.timeout.as_dict()
+        todict["read"] = 15
+        self._sess.timeout = httpx.Timeout(**todict)
 
-        self._sess = httpx.Client(base_url=base_url, headers=_headers,**settings)
-
-    def _get(self, url: str, params: dict = None, **kwargs) -> httpx.Response:
+    def _get(self, url: str, params: Optional[dict] = None, **kwargs) -> httpx.Response:
         """internal get method
 
         Args:
@@ -49,7 +70,9 @@ class APIFactory:
         res = self._sess.get(url, params=params, **kwargs)
         return res
 
-    def _post(self, url: str, params: dict = None, **kwargs) -> httpx.Response:
+    def _post(
+        self, url: str, params: Optional[dict] = None, **kwargs
+    ) -> httpx.Response:
         """internal post method
 
         Args:
@@ -137,7 +160,7 @@ class CurseAPI:
         api_key: str,
         base_url: str = "https://api.curseforge.com",
         user_agent: str = "stinky-c/curse-api",
-        factory: APIFactory = APIFactory,
+        factory: Type[APIFactory] = APIFactory,
         **settings,
     ) -> None:
         self._api: APIFactory = factory(
@@ -157,7 +180,7 @@ class CurseAPI:
     def api(self):
         return self._api
 
-    def health_check(self,**k) -> httpx.Response:
+    def health_check(self, **k) -> httpx.Response:
         res = self._api._get("/")
         return res
 
@@ -191,17 +214,17 @@ class CurseAPI:
     def search_mods(
         self,
         gameId: Games = Games.Minecraft,
-        classId: int = None,
-        categoryId: MinecraftCategories = None,
-        gameVersion: str = None,
-        searchFilter: str = None,
-        sortField: ModsSearchSortField = None,
-        sortOrder: SortOrder = None,
-        modLoaderType: ModLoaderType = None,
-        gameVersionTypeId: int = None,
-        slug: str = None,
-        index: int = 0,
-        pageSize: int = 50,
+        classId: Optional[int] = None,
+        categoryId: Optional[MinecraftCategories] = None,
+        gameVersion: Optional[str] = None,
+        searchFilter: Optional[str] = None,
+        sortField: Optional[ModsSearchSortField] = None,
+        sortOrder: Optional[SortOrder] = None,
+        modLoaderType: Optional[ModLoaderType] = None,
+        gameVersionTypeId: Optional[int] = None,
+        slug: Optional[str] = None,
+        index: Optional[int] = 0,
+        pageSize: Optional[int] = 50,
     ) -> tuple[List[Mod], Pagination]:
         """https://docs.curseforge.com/#search-mods
 
@@ -279,9 +302,9 @@ class CurseAPI:
     def get_mod_files(
         self,
         modId: int,
-        gameVersion: str = None,
-        modLoaderType: ModLoaderType = None,
-        gameVersionTypeId: int = None,
+        gameVersion: Optional[str] = None,
+        modLoaderType: Optional[ModLoaderType] = None,
+        gameVersionTypeId: Optional[int] = None,
         index: int = 0,
         pageSize: int = 50,
     ) -> tuple[list[File], Pagination]:
