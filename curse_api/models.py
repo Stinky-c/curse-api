@@ -1,8 +1,11 @@
 from dataclasses import dataclass
 from datetime import datetime
+import json
 from pathlib import Path
 from typing import Any, List, Optional
-import httpx
+from typing_extensions import Self
+import chili  # type: ignore
+import httpx  # type: ignore
 
 from .enums import (
     CoreApiStatus,
@@ -27,19 +30,46 @@ If exceptions to the format or naming conventions there will be a comment detail
 # File
 # Modloader
 # minecraft Game Version
-class BaseRequest:
+class APIBanned(Exception):
+    """In case a mod is banned from interacting with the API"""
+
+
+class BaseCurseModel:
+    """The base for curseforge data"""
+
+    def to_dict(self) -> dict[str, Any]:
+        d = chili.asdict(self)
+        d["cls"] = type(self)
+        return d
+
+    def to_json(self) -> str:
+        return json.dumps(self.to_dict())
+
+    @classmethod
+    def from_dict(cls, data: dict) -> Self:
+
+        return chili.init_dataclass(data, data["cls"])
+
+    @classmethod
+    def from_json(cls, data: str) -> Self:
+        return cls.from_dict(json.loads(data))
+
+
+class BaseRequest(BaseCurseModel):
     def _download(self, url, **kwargs) -> bytes:
         """Kwargs is passed to httpx.get"""
         if url is None:
-            raise Exception("URL is unavailable")
-        res = httpx.get(url, follow_redirects=True, **kwargs)
+            raise APIBanned("Mod is unavailable")
+        res = httpx.get(
+            url, follow_redirects=True, **kwargs, timeout=httpx.Timeout(5, read=15)
+        )
         res.raise_for_status()
         return res.content
 
 
 # misc
 @dataclass(slots=True)
-class SortableGameVersion:
+class SortableGameVersion(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_SortableGameVersion"""
 
     gameVersionName: str
@@ -50,7 +80,7 @@ class SortableGameVersion:
 
 
 @dataclass(slots=True)
-class Category:
+class Category(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_Category"""
 
     id: int
@@ -89,7 +119,7 @@ class MinecraftGameVersion(BaseRequest):
 
 
 @dataclass(slots=True)
-class MinecraftModLoaderIndex:
+class MinecraftModLoaderIndex(BaseCurseModel):
     "https://docs.curseforge.com/#tocS_MinecraftModLoaderIndex"
     name: str
     gameVersion: str
@@ -146,7 +176,7 @@ class MinecraftModLoaderVersion(BaseRequest):
 
 # file
 @dataclass(slots=True)
-class FileDependency:
+class FileDependency(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_FileDependency"""
 
     modId: int
@@ -154,7 +184,7 @@ class FileDependency:
 
 
 @dataclass(slots=True)
-class FileHash:
+class FileHash(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_FileHash"""
 
     value: str
@@ -162,7 +192,7 @@ class FileHash:
 
 
 @dataclass(slots=True)
-class FileIndex:
+class FileIndex(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_FileIndex"""
 
     gameVersion: str
@@ -174,7 +204,7 @@ class FileIndex:
 
 
 @dataclass(slots=True)
-class FileModule:
+class FileModule(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_FileModule"""
 
     name: str
@@ -214,7 +244,7 @@ class File(BaseRequest):
 
 
 @dataclass(slots=True)
-class FingerprintFuzzyMatch:
+class FingerprintFuzzyMatch(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_FingerprintFuzzyMatch"""
 
     id: int
@@ -223,14 +253,8 @@ class FingerprintFuzzyMatch:
     fingerprints: List[int]
 
 
-# @dataclass(slots=True)
-# class FingerprintFuzzyMatchResult:
-#     """https://docs.curseforge.com/#tocS_FingerprintFuzzyMatchResult"""
-#     fuzzyMatches: List[FingerprintFuzzyMatch]
-
-
 @dataclass(slots=True)
-class FingerprintMatch:
+class FingerprintMatch(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_FingerprintMatch"""
 
     id: int
@@ -239,7 +263,7 @@ class FingerprintMatch:
 
 
 @dataclass(slots=True)
-class FingerprintsMatchesResult:
+class FingerprintsMatchesResult(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_FingerprintsMatchesResult"""
 
     isCacheBuilt: bool
@@ -252,7 +276,7 @@ class FingerprintsMatchesResult:
 
 
 @dataclass(slots=True)
-class FolderFingerprint:
+class FolderFingerprint(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_FolderFingerprint"""
 
     foldername: str
@@ -261,7 +285,7 @@ class FolderFingerprint:
 
 # game
 @dataclass(slots=True)
-class GameAssets:
+class GameAssets(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_GameAssets"""
 
     iconUrl: str
@@ -270,7 +294,7 @@ class GameAssets:
 
 
 @dataclass(slots=True)
-class Game:
+class Game(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_Game"""
 
     id: int
@@ -283,7 +307,7 @@ class Game:
 
 
 @dataclass(slots=True)
-class GameVersionType:
+class GameVersionType(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_GameVersionsByType"""
 
     id: int
@@ -294,7 +318,7 @@ class GameVersionType:
 
 # mod
 @dataclass(slots=True)
-class ModAsset:
+class ModAsset(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_ModAsset"""
 
     id: int
@@ -306,7 +330,7 @@ class ModAsset:
 
 
 @dataclass(slots=True)
-class ModAuthor:
+class ModAuthor(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_ModAuthor"""
 
     id: int
@@ -315,7 +339,7 @@ class ModAuthor:
 
 
 @dataclass(slots=True)
-class ModLinks:
+class ModLinks(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_ModLinks"""
 
     websiteUrl: Optional[str]
@@ -362,7 +386,7 @@ class Mod(BaseRequest):
 
 # misc
 @dataclass(slots=True)
-class FeaturedModsResponse:
+class FeaturedModsResponse(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_FeaturedModsResponse"""
 
     featured: List[Mod]
@@ -371,7 +395,7 @@ class FeaturedModsResponse:
 
 
 @dataclass(slots=True)
-class Pagination:
+class Pagination(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_Pagination"""
 
     index: int
