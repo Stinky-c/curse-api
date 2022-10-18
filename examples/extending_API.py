@@ -1,9 +1,9 @@
 import os
-from curse_api.api import APIFactory, CurseAPI
+from curse_api import CurseAPI, APIFactory
 
 
-class NewFactory(APIFactory):
-    # A simple overide that prints the url and http method
+class MyFactory(APIFactory):
+    # A simple factory that prints the url and http method
 
     def _get(self, url, params=None, **kwargs):
         print("GET", url)
@@ -14,7 +14,7 @@ class NewFactory(APIFactory):
         return super()._post(url, params, **kwargs)
 
 
-api = CurseAPI(os.environ["CF_API_KEY"], factory=NewFactory)
+api = CurseAPI(os.environ["CF_API_KEY"], factory=MyFactory)
 
 api.get_mod(3358)
 api.search_mods(slug="jei")

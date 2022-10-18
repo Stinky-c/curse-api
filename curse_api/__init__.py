@@ -1,5 +1,5 @@
-from .api import CurseAPI
-from .enums import Games, ModsSearchSortField
+from .api import CurseAPI, APIFactory
+from .enums import Games, ModsSearchSortField, ModLoaderType
 from .models import File, Mod
 
 __all__ = ["CurseAPI", "Mod", "File", "Games", "ModsSearchSortField"]

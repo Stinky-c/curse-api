@@ -4,7 +4,8 @@ from curse_api import CurseAPI
 api = CurseAPI(os.environ["CF_API_KEY"])
 
 # setting httpx client timeout to 30 seconds
-api.api.set_client_timeout(default=8)
+print(api.api._sess.timeout)
+api.api.set_client_timeout(default=30)
 print(api.api._sess.timeout)
 
 # setting response and request hooks
@@ -18,8 +19,8 @@ api.api.set_response_hook(log)
 api.get_mod(285109)
 
 # print the current hooks
-print("request hooks", api.request_hooks)
-print("request hooks", api.response_hooks)
+print("request hooks", api.api.request_hooks)
+print("request hooks", api.api.response_hooks)
 
 # remove all request and response hooks
 # returns the functions

@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime
 import json
 from pathlib import Path
-from typing import Any, List, Optional
+from typing import Any, Generic, List, Optional, TypeVar
 from typing_extensions import Self
 import chili  # type: ignore
 import httpx  # type: ignore
@@ -25,7 +25,7 @@ from .enums import (
 schemas can be found at https://docs.curseforge.com/#schemas
 If exceptions to the format or naming conventions there will be a comment detailing the change
 """
-
+T = TypeVar("T")
 # TODO: rewrite download handling code
 # File
 # Modloader
@@ -47,7 +47,6 @@ class BaseCurseModel:
 
     @classmethod
     def from_dict(cls, data: dict) -> Self:
-
         return chili.init_dataclass(data, data["cls"])
 
     @classmethod
@@ -129,6 +128,7 @@ class MinecraftModLoaderIndex(BaseCurseModel):
     type: Optional[ModLoaderType]
 
     def get(self, headers: dict, url: str = "https://api.curseforge.com"):
+        raise NotImplementedError # TODO
         res = httpx.get(url + f"/v1/minecraft/modloader/{self.name}")
         res.raise_for_status()
         return res
@@ -381,7 +381,7 @@ class Mod(BaseRequest):
     def download_latest(self, **kwargs) -> bytes:
         if len(self.latestFiles) == 0:
             raise Exception("")
-        return self._download(self.latestFiles[0].downloadUrl)
+        return self._download(self.latestFiles[0].downloadUrl, **kwargs)
 
 
 # misc
@@ -402,3 +402,24 @@ class Pagination(BaseCurseModel):
     pageSize: int
     resultCount: int
     totalCount: int
+
+
+class FilterableVersionList(list, Generic[T]):
+    """a custom list for accessibility"""
+    # TODO:
+    def filter(self, gvs: Optional[str] = None, ml: Optional[ModLoaderType] = None):
+        """Sorts the list and returns a new list matching a string filter"""
+        if len(self) <= 0:
+            raise Exception("Not long enough to filter")
+        temp = self
+        if gvs and isinstance(self[0], MinecraftModLoaderIndex):
+            temp = sorted(self, key=lambda g: not g.gameVersion == gvs)
+        if ml and isinstance(self[0], MinecraftModLoaderIndex):
+            raise NotImplementedError # TODO filter by modloader type
+            temp = sorted(self, key=lambda g: not g.type == ml)
+        return temp
+
+    def latest(self,gvs: str):
+        """returns """
+        if len(self) <= 0:
+            raise Exception("Not long enough to filter")
