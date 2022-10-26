@@ -42,16 +42,9 @@ class BaseCurseModel:
         d["cls"] = type(self)
         return d
 
-    def to_json(self) -> str:
-        return json.dumps(self.to_dict())
-
     @classmethod
     def from_dict(cls, data: dict) -> Self:
         return chili.init_dataclass(data, data["cls"])
-
-    @classmethod
-    def from_json(cls, data: str) -> Self:
-        return cls.from_dict(json.loads(data))
 
 
 class BaseRequest(BaseCurseModel):
@@ -125,10 +118,10 @@ class MinecraftModLoaderIndex(BaseCurseModel):
     latest: bool
     recommended: bool
     dateModified: datetime
-    type: Optional[ModLoaderType]
+    type: ModLoaderType
 
     def get(self, headers: dict, url: str = "https://api.curseforge.com"):
-        raise NotImplementedError # TODO
+        raise NotImplementedError  # TODO
         res = httpx.get(url + f"/v1/minecraft/modloader/{self.name}")
         res.raise_for_status()
         return res
@@ -406,20 +399,27 @@ class Pagination(BaseCurseModel):
 
 class FilterableVersionList(list, Generic[T]):
     """a custom list for accessibility"""
-    # TODO:
+
+    # TODO
     def filter(self, gvs: Optional[str] = None, ml: Optional[ModLoaderType] = None):
         """Sorts the list and returns a new list matching a string filter"""
         if len(self) <= 0:
             raise Exception("Not long enough to filter")
         temp = self
         if gvs and isinstance(self[0], MinecraftModLoaderIndex):
-            temp = sorted(self, key=lambda g: not g.gameVersion == gvs)
+            temp = [t for t in temp if t.gameVersion == gvs]
         if ml and isinstance(self[0], MinecraftModLoaderIndex):
-            raise NotImplementedError # TODO filter by modloader type
-            temp = sorted(self, key=lambda g: not g.type == ml)
+            temp = [t for t in temp if t.type == ml]
         return temp
 
-    def latest(self,gvs: str):
-        """returns """
-        if len(self) <= 0:
-            raise Exception("Not long enough to filter")
+    def latest(self, gvs: Optional[str] = None, ml: Optional[ModLoaderType] = None):
+        """returns the latest for a given versions"""
+        self = self.filter(gvs=gvs, ml=ml)
+        return [i for i in self if i.latest == True][0]
+
+    def recommended(
+        self, gvs: Optional[str] = None, ml: Optional[ModLoaderType] = None
+    ):
+        """returns the recommended for a given version"""
+        self = self.filter(gvs=gvs, ml=ml)
+        return [i for i in self if i.recommended == True]

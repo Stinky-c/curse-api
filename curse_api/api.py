@@ -186,15 +186,13 @@ class CurseAPI:
         return res
 
     # @cache # intellisense no like
-    def minecraft_versions(self) -> FilterableVersionList[MinecraftGameVersion]:
+    def minecraft_versions(self) -> List[MinecraftGameVersion]:
         """Returns all minecraft version data from curseforge.
         Use `get_specific_minecraft_version` with the game version string to get more detailed data.
         """
         res = self._api._get("/v1/minecraft/version")
         res.raise_for_status()
-        return FilterableVersionList(
-            init_dataclass(x, MinecraftGameVersion) for x in res.json()["data"]
-        )
+        return [init_dataclass(x, MinecraftGameVersion) for x in res.json()["data"]]
 
     def get_specific_minecraft_version(
         self, gameVersionString: str
@@ -209,7 +207,7 @@ class CurseAPI:
         Returns all minecraft modloader data from curseforge.
         Use `get_specific_minecraft_modloader` with the slug to get more detailed data.
         """
-        res = self._api._get("/v1/minecraft/modloader")
+        res = self._api._get("/v1/minecraft/modloader", params={"includeAll": True})
         res.raise_for_status()
         return FilterableVersionList(
             init_dataclass(x, MinecraftModLoaderIndex) for x in res.json()["data"]
