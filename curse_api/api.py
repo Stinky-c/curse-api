@@ -2,7 +2,6 @@
 from typing import Callable, List, Optional, Type
 
 import httpx  # type: ignore
-from chili import init_dataclass  # type: ignore
 
 from .enums import (
     Games,
@@ -19,12 +18,18 @@ from .models import (
     MinecraftModLoaderVersion,
     Mod,
     Pagination,
+    BaseCurseModel,
 )
 
 """
 TODO: write more doc strings
 IDEA: make APIFactory a class with class methods and class variables
 """
+
+
+def init_dataclass(data: dict, model: Type[BaseCurseModel]):
+    return model.parse_obj(data)
+    ...
 
 
 class APIFactory:

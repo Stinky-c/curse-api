@@ -1,10 +1,9 @@
 from dataclasses import dataclass
 from datetime import datetime
-import json
+from pydantic import BaseModel
 from pathlib import Path
-from typing import Any, Generic, List, Optional, TypeVar
+from typing import Any, List, Optional, TypeVar
 from typing_extensions import Self
-import chili  # type: ignore
 import httpx  # type: ignore
 
 from .enums import (
@@ -34,11 +33,11 @@ class APIBanned(Exception):
     """In case a mod is banned from interacting with the API"""
 
 
-class BaseCurseModel:
+class BaseCurseModel(BaseModel):
     """The base for curseforge data"""
 
-    def to_dict(self) -> dict[str, Any]:
-        return chili.asdict(self)
+    def to_dict(self):
+        return self.dict()
 
 
 class BaseRequest(BaseCurseModel):
@@ -54,7 +53,8 @@ class BaseRequest(BaseCurseModel):
 
 
 # misc
-@dataclass(slots=True)
+
+
 class SortableGameVersion(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_SortableGameVersion"""
 
@@ -65,7 +65,6 @@ class SortableGameVersion(BaseCurseModel):
     gameVersionTypeId: Optional[int]
 
 
-@dataclass(slots=True)
 class Category(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_Category"""
 
@@ -82,7 +81,8 @@ class Category(BaseCurseModel):
 
 
 # game version
-@dataclass(slots=True)
+
+
 class MinecraftGameVersion(BaseRequest):
     """https://docs.curseforge.com/#tocS_MinecraftGameVersion"""
 
@@ -104,7 +104,6 @@ class MinecraftGameVersion(BaseRequest):
         return self._download(self.jsonDownloadUrl, **kwargs)
 
 
-@dataclass(slots=True)
 class MinecraftModLoaderIndex(BaseCurseModel):
     "https://docs.curseforge.com/#tocS_MinecraftModLoaderIndex"
     name: str
@@ -121,7 +120,6 @@ class MinecraftModLoaderIndex(BaseCurseModel):
         return res
 
 
-@dataclass(slots=True)
 class MinecraftModLoaderVersion(BaseRequest):
     "https://docs.curseforge.com/#tocS_MinecraftModLoaderVersion"
     id: int
@@ -141,7 +139,7 @@ class MinecraftModLoaderVersion(BaseRequest):
     versionJson: str
     librariesInstallLocation: str
     minecraftVersion: str
-    additionalFilesJson: str
+    additionalFilesJson: Optional[str]
     modLoaderGameVersionId: int
     modLoaderGameVersionTypeId: int
     modLoaderGameVersionStatus: GameVersionStatus
@@ -162,7 +160,8 @@ class MinecraftModLoaderVersion(BaseRequest):
 
 
 # file
-@dataclass(slots=True)
+
+
 class FileDependency(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_FileDependency"""
 
@@ -170,7 +169,6 @@ class FileDependency(BaseCurseModel):
     relationType: FileRelationType
 
 
-@dataclass(slots=True)
 class FileHash(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_FileHash"""
 
@@ -178,7 +176,6 @@ class FileHash(BaseCurseModel):
     algo: HashAlgo
 
 
-@dataclass(slots=True)
 class FileIndex(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_FileIndex"""
 
@@ -190,7 +187,6 @@ class FileIndex(BaseCurseModel):
     modLoader: Optional[ModLoaderType]
 
 
-@dataclass(slots=True)
 class FileModule(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_FileModule"""
 
@@ -198,7 +194,6 @@ class FileModule(BaseCurseModel):
     fingerprint: int
 
 
-@dataclass(slots=True)
 class File(BaseRequest):
     """https://docs.curseforge.com/#tocS_File"""
 
@@ -230,7 +225,6 @@ class File(BaseRequest):
         return self._download(self.downloadUrl, **kwargs)
 
 
-@dataclass(slots=True)
 class FingerprintFuzzyMatch(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_FingerprintFuzzyMatch"""
 
@@ -240,7 +234,6 @@ class FingerprintFuzzyMatch(BaseCurseModel):
     fingerprints: List[int]
 
 
-@dataclass(slots=True)
 class FingerprintMatch(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_FingerprintMatch"""
 
@@ -249,7 +242,6 @@ class FingerprintMatch(BaseCurseModel):
     latestFiles: List[File]
 
 
-@dataclass(slots=True)
 class FingerprintsMatchesResult(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_FingerprintsMatchesResult"""
 
@@ -262,7 +254,6 @@ class FingerprintsMatchesResult(BaseCurseModel):
     unmatchedFingerprints: Optional[List[int]]
 
 
-@dataclass(slots=True)
 class FolderFingerprint(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_FolderFingerprint"""
 
@@ -271,7 +262,8 @@ class FolderFingerprint(BaseCurseModel):
 
 
 # game
-@dataclass(slots=True)
+
+
 class GameAssets(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_GameAssets"""
 
@@ -280,7 +272,6 @@ class GameAssets(BaseCurseModel):
     coverUrl: str
 
 
-@dataclass(slots=True)
 class Game(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_Game"""
 
@@ -293,7 +284,6 @@ class Game(BaseCurseModel):
     apiStatus: CoreApiStatus
 
 
-@dataclass(slots=True)
 class GameVersionType(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_GameVersionsByType"""
 
@@ -304,7 +294,8 @@ class GameVersionType(BaseCurseModel):
 
 
 # mod
-@dataclass(slots=True)
+
+
 class ModAsset(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_ModAsset"""
 
@@ -316,7 +307,6 @@ class ModAsset(BaseCurseModel):
     url: str
 
 
-@dataclass(slots=True)
 class ModAuthor(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_ModAuthor"""
 
@@ -325,7 +315,6 @@ class ModAuthor(BaseCurseModel):
     url: str
 
 
-@dataclass(slots=True)
 class ModLinks(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_ModLinks"""
 
@@ -335,7 +324,6 @@ class ModLinks(BaseCurseModel):
     sourceUrl: Optional[str]
 
 
-@dataclass(slots=True)
 class Mod(BaseRequest):
     """https://docs.curseforge.com/#tocS_Mod"""
 
@@ -372,7 +360,8 @@ class Mod(BaseRequest):
 
 
 # misc
-@dataclass(slots=True)
+
+
 class FeaturedModsResponse(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_FeaturedModsResponse"""
 
@@ -381,7 +370,6 @@ class FeaturedModsResponse(BaseCurseModel):
     recentlyUpdated: List[Mod]
 
 
-@dataclass(slots=True)
 class Pagination(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_Pagination"""
 
