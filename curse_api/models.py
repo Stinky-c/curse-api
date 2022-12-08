@@ -26,9 +26,6 @@ If exceptions to the format or naming conventions there will be a comment detail
 """
 T = TypeVar("T")
 # TODO: rewrite download handling code
-# File
-# Modloader
-# minecraft Game Version
 class APIBanned(Exception):
     """In case a mod is banned from interacting with the API"""
 
@@ -37,7 +34,13 @@ class BaseCurseModel(BaseModel):
     """The base for curseforge data"""
 
     def to_dict(self):
+        """transforms object to a dict"""
         return self.dict()
+
+    @classmethod
+    def from_dict(cls, data: dict):
+        """Given data returns a hydrated object"""
+        return cls.parse_obj(data)
 
 
 class BaseRequest(BaseCurseModel):
@@ -377,32 +380,3 @@ class Pagination(BaseCurseModel):
     pageSize: int
     resultCount: int
     totalCount: int
-
-
-# TODO
-# i should fix this...
-# class FilterableVersionList(list[T]): # type: ignore
-#     """a custom list for accessibility"""
-
-#     def filter(self, gvs: Optional[str] = None, ml: Optional[ModLoaderType] = None):
-#         """Sorts the list and returns a new list matching a string filter"""
-#         if len(self) <= 0:
-#             raise Exception("Not long enough to filter")
-#         temp = self
-#         if gvs and isinstance(self[0], MinecraftModLoaderIndex):
-#             temp = [t for t in temp if t.gameVersion == gvs]
-#         if ml and isinstance(self[0], MinecraftModLoaderIndex):
-#             temp = [t for t in temp if t.type == ml]
-#         return temp
-
-#     def latest(self, gvs: Optional[str] = None, ml: Optional[ModLoaderType] = None):
-#         """returns the latest for a given versions"""
-#         self = self.filter(gvs=gvs, ml=ml)
-#         return [i for i in self if i.latest == True][0]
-
-#     def recommended(
-#         self, gvs: Optional[str] = None, ml: Optional[ModLoaderType] = None
-#     ):
-#         """returns the recommended for a given version"""
-#         self = self.filter(gvs=gvs, ml=ml)
-#         return [i for i in self if i.recommended == True]

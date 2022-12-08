@@ -15,8 +15,7 @@ Built to serve CF endpoints while providing methods and functions to assist in f
 ## Some backstory
 
 A while back when I was starting to learn python further then the basics I created a small tool to download Minecraft mods from a pack manifest.
-Soon after I wrote it the new API changes came and broke it. Now once more I want to return to that project idea and expand further. Thus chance to rewrite an old api wrapper of mine with a new library [Chili](https://pypi.org/project/chili/), a dataclass support library also providing data hydration. I have learned a lot since I first wrote that tool. I hope to learn more to build a better revision of it.
-I decided that this simple-ish api wrapper would be the first step to a Modpack manager.
+Soon after I wrote it the new API changes came and broke it. Now once more I want to return to that project idea and expand further. After first rewriting the project using [chili](https://pypi.org/project/chili/) it felt off, so returned to rewrite once more using pydantic for data validation and ease of access
 
 ----
 
@@ -24,7 +23,7 @@ I decided that this simple-ish api wrapper would be the first step to a Modpack 
 
 Main Dependencies:
 
-- [Chili](https://pypi.org/project/chili/)
+- [Pydantic](https://pypi.org/project/pydantic/)
 - [HTTPX](https://pypi.org/project/httpx/)
 
 Currently implemented:

@@ -8,7 +8,7 @@ api = CurseAPI(os.environ["CF_API_KEY"])
 a = api.search_mods(searchFilter="JEI", slug="jei")
 # applies the search filters to the standard of CF docs
 
-mod = api.get_mod(3358)  # returns a singular Mod
+mod = api.get_mod(250398)  # returns a singular Mod
 mod_list = api.get_mods([285109, 238222])  # returns a list of Mods
 
 
@@ -25,3 +25,4 @@ ml = api.modloader_versions()  # returns **ALL** modloader versions on curseforg
 # does not use functools
 mc_112 = api.get_specific_minecraft_version("1.12.2")  # returns minecraft version related information
 forge = api.get_specific_minecraft_modloader("forge-36.2.39")  # returns forge related version information
+pass
