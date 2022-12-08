@@ -38,13 +38,7 @@ class BaseCurseModel:
     """The base for curseforge data"""
 
     def to_dict(self) -> dict[str, Any]:
-        d = chili.asdict(self)
-        d["cls"] = type(self)
-        return d
-
-    @classmethod
-    def from_dict(cls, data: dict) -> Self:
-        return chili.init_dataclass(data, data["cls"])
+        return chili.asdict(self)
 
 
 class BaseRequest(BaseCurseModel):
@@ -397,29 +391,30 @@ class Pagination(BaseCurseModel):
     totalCount: int
 
 
-class FilterableVersionList(list, Generic[T]):
-    """a custom list for accessibility"""
+# TODO
+# i should fix this...
+# class FilterableVersionList(list[T]): # type: ignore
+#     """a custom list for accessibility"""
 
-    # TODO
-    def filter(self, gvs: Optional[str] = None, ml: Optional[ModLoaderType] = None):
-        """Sorts the list and returns a new list matching a string filter"""
-        if len(self) <= 0:
-            raise Exception("Not long enough to filter")
-        temp = self
-        if gvs and isinstance(self[0], MinecraftModLoaderIndex):
-            temp = [t for t in temp if t.gameVersion == gvs]
-        if ml and isinstance(self[0], MinecraftModLoaderIndex):
-            temp = [t for t in temp if t.type == ml]
-        return temp
+#     def filter(self, gvs: Optional[str] = None, ml: Optional[ModLoaderType] = None):
+#         """Sorts the list and returns a new list matching a string filter"""
+#         if len(self) <= 0:
+#             raise Exception("Not long enough to filter")
+#         temp = self
+#         if gvs and isinstance(self[0], MinecraftModLoaderIndex):
+#             temp = [t for t in temp if t.gameVersion == gvs]
+#         if ml and isinstance(self[0], MinecraftModLoaderIndex):
+#             temp = [t for t in temp if t.type == ml]
+#         return temp
 
-    def latest(self, gvs: Optional[str] = None, ml: Optional[ModLoaderType] = None):
-        """returns the latest for a given versions"""
-        self = self.filter(gvs=gvs, ml=ml)
-        return [i for i in self if i.latest == True][0]
+#     def latest(self, gvs: Optional[str] = None, ml: Optional[ModLoaderType] = None):
+#         """returns the latest for a given versions"""
+#         self = self.filter(gvs=gvs, ml=ml)
+#         return [i for i in self if i.latest == True][0]
 
-    def recommended(
-        self, gvs: Optional[str] = None, ml: Optional[ModLoaderType] = None
-    ):
-        """returns the recommended for a given version"""
-        self = self.filter(gvs=gvs, ml=ml)
-        return [i for i in self if i.recommended == True]
+#     def recommended(
+#         self, gvs: Optional[str] = None, ml: Optional[ModLoaderType] = None
+#     ):
+#         """returns the recommended for a given version"""
+#         self = self.filter(gvs=gvs, ml=ml)
+#         return [i for i in self if i.recommended == True]

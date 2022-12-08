@@ -1,5 +1,5 @@
-from functools import cache
-from typing import Any, Callable, List, Optional, Type
+# from functools import cache
+from typing import Callable, List, Optional, Type
 
 import httpx  # type: ignore
 from chili import init_dataclass  # type: ignore
@@ -19,7 +19,6 @@ from .models import (
     MinecraftModLoaderVersion,
     Mod,
     Pagination,
-    FilterableVersionList,
 )
 
 """
@@ -202,16 +201,14 @@ class CurseAPI:
         return init_dataclass(res.json()["data"], MinecraftGameVersion)
 
     # @cache # intellisense no like
-    def modloader_versions(self) -> FilterableVersionList[MinecraftModLoaderIndex]:
+    def modloader_versions(self) -> List[MinecraftModLoaderIndex]:
         """
         Returns all minecraft modloader data from curseforge.
         Use `get_specific_minecraft_modloader` with the slug to get more detailed data.
         """
         res = self._api._get("/v1/minecraft/modloader", params={"includeAll": True})
         res.raise_for_status()
-        return FilterableVersionList(
-            init_dataclass(x, MinecraftModLoaderIndex) for x in res.json()["data"]
-        )
+        return [init_dataclass(x, MinecraftModLoaderIndex) for x in res.json()["data"]]
 
     def get_specific_minecraft_modloader(
         self, modLoaderName: str
