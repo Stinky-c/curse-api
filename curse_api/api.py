@@ -1,8 +1,6 @@
-# from functools import cache
 from typing import Callable, List, Optional, Type
 
-import httpx  # type: ignore
-from chili import init_dataclass  # type: ignore
+import httpx
 
 from .enums import (
     Games,
@@ -184,23 +182,21 @@ class CurseAPI:
         res = self._api._get("/")
         return res
 
-    # @cache # intellisense no like
     def minecraft_versions(self) -> List[MinecraftGameVersion]:
         """Returns all minecraft version data from curseforge.
         Use `get_specific_minecraft_version` with the game version string to get more detailed data.
         """
         res = self._api._get("/v1/minecraft/version")
         res.raise_for_status()
-        return [init_dataclass(x, MinecraftGameVersion) for x in res.json()["data"]]
+        return [MinecraftGameVersion.from_dict(x) for x in res.json()["data"]]
 
     def get_specific_minecraft_version(
         self, gameVersionString: str
     ) -> MinecraftGameVersion:
         res = self._api._get(f"/v1/minecraft/version/{gameVersionString}")
         res.raise_for_status()
-        return init_dataclass(res.json()["data"], MinecraftGameVersion)
+        return MinecraftGameVersion.from_dict(res.json()["data"])
 
-    # @cache # intellisense no like
     def modloader_versions(self) -> List[MinecraftModLoaderIndex]:
         """
         Returns all minecraft modloader data from curseforge.
@@ -208,14 +204,14 @@ class CurseAPI:
         """
         res = self._api._get("/v1/minecraft/modloader", params={"includeAll": True})
         res.raise_for_status()
-        return [init_dataclass(x, MinecraftModLoaderIndex) for x in res.json()["data"]]
+        return [MinecraftModLoaderIndex.from_dict(x) for x in res.json()["data"]]
 
     def get_specific_minecraft_modloader(
         self, modLoaderName: str
     ) -> MinecraftModLoaderVersion:
         res = self._api._get(f"/v1/minecraft/modloader/{modLoaderName}")
         res.raise_for_status()
-        return init_dataclass(res.json()["data"], MinecraftModLoaderVersion)
+        return MinecraftModLoaderVersion.from_dict(res.json()["data"])
 
     def search_mods(
         self,
@@ -273,19 +269,19 @@ class CurseAPI:
         )
         res.raise_for_status()
         d = res.json()
-        return [init_dataclass(x, Mod) for x in d["data"]], init_dataclass(
-            d["pagination"], Pagination
+        return [Mod.from_dict(x) for x in d["data"]], Pagination.from_dict(
+            d["pagination"]
         )
 
     def get_mod(self, modId: int) -> Mod:
         res = self._api._get(f"/v1/mods/{modId}")
         res.raise_for_status()
-        return init_dataclass(res.json()["data"], Mod)
+        return Mod.from_dict(res.json()["data"])
 
     def get_mods(self, modIdList: list[int]) -> list[Mod]:
         res = self._api._post("/v1/mods", params={"modIds": modIdList})
         res.raise_for_status()
-        return [init_dataclass(x, Mod) for x in res.json()["data"]]
+        return [Mod.from_dict(x) for x in res.json()["data"]]
 
     def get_mod_description(self, modId: int) -> str:
         res = self._api._get(f"/v1/mods/{modId}/description")
@@ -298,12 +294,12 @@ class CurseAPI:
         I dont really know a use for this, but I can easily support it."""
         res = self._api._post("/v1/fingerprints", params={"fingerprints": fingerprints})
         res.raise_for_status()
-        return init_dataclass(res.json()["data"], FingerprintsMatchesResult)
+        return FingerprintsMatchesResult.from_dict(res.json()["data"])
 
     def get_files(self, fileList: list[int]) -> list[File]:
         res = self._api._post("/v1/mods/files", params={"fileIds": fileList})
         res.raise_for_status()
-        return [init_dataclass(x, File) for x in res.json()["data"]]
+        return [File.from_dict(x) for x in res.json()["data"]]
 
     def get_mod_files(
         self,
@@ -326,14 +322,14 @@ class CurseAPI:
         )
         res.raise_for_status()
         d = res.json()
-        return [init_dataclass(x, File) for x in d["data"]], init_dataclass(
-            d["pagination"], Pagination
+        return [File.from_dict(x) for x in d["data"]], Pagination.from_dict(
+            d["pagination"]
         )
 
     def get_mod_file(self, modId: int, fileId: int) -> File:
         res = self._api._get(f"/v1/mods/{modId}/files/{fileId}")
         res.raise_for_status()
-        return init_dataclass(res.json()["data"], File)
+        return File.from_dict(res.json()["data"])
 
     def get_mod_file_changelog(self, modId: int, fileId: int) -> str:
         res = self._api._get(f"/v1/mods/{modId}/files/{fileId}/changelog")
