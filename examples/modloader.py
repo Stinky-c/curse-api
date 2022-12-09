@@ -1,5 +1,4 @@
 from curse_api import CurseAPI, ModLoaderType
-from curse_api.models import MinecraftModLoaderIndex
 import os
 import json
 

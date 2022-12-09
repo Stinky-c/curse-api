@@ -18,3 +18,11 @@ Minecraft manifest support coming soon
 ## [Extending the API Factory](extending_API.py)
 
 A showcase with a simple example of subclassing the request handler
+
+## [Serialization and Deserialization](dictionary_factory.py)
+
+A WIP example of serialization and deserialization of models
+
+## [Modloaders and Filtering](modloader.py)
+
+A example of fetching and filtering for minecraft modloader versions

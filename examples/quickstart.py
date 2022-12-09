@@ -26,4 +26,3 @@ ml = api.modloader_versions()  # returns **ALL** modloader versions on curseforg
 
 mc_112 = api.get_specific_minecraft_version("1.12.2")           # returns minecraft version related information
 forge = api.get_specific_minecraft_modloader("forge-36.2.39")   # returns forge related version information
-pass
