@@ -1,7 +1,6 @@
-from functools import cache
 from typing import Callable, List, Optional, Type
 
-import httpx  # type: ignore
+import httpx
 
 from .enums import (
     Games,
@@ -18,15 +17,12 @@ from .models import (
     MinecraftModLoaderVersion,
     Mod,
     Pagination,
-    BaseCurseModel,
 )
 
 """
 TODO: write more doc strings
 IDEA: make APIFactory a class with class methods and class variables
 """
-
-
 
 
 class APIFactory:
@@ -186,7 +182,6 @@ class CurseAPI:
         res = self._api._get("/")
         return res
 
-    @cache # intellisense no like
     def minecraft_versions(self) -> List[MinecraftGameVersion]:
         """Returns all minecraft version data from curseforge.
         Use `get_specific_minecraft_version` with the game version string to get more detailed data.
@@ -202,7 +197,6 @@ class CurseAPI:
         res.raise_for_status()
         return MinecraftGameVersion.from_dict(res.json()["data"])
 
-    @cache # intellisense no like
     def modloader_versions(self) -> List[MinecraftModLoaderIndex]:
         """
         Returns all minecraft modloader data from curseforge.

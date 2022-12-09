@@ -1,11 +1,10 @@
-from dataclasses import dataclass
 from datetime import datetime
 from pydantic import BaseModel
 from pathlib import Path
-from typing import Any, List, Optional, TypeVar
-from typing_extensions import Self
+from typing import Any, List, Optional, TypeVar, TextIO
+import json
+from pydantic.json import pydantic_encoder
 import httpx  # type: ignore
-
 from .enums import (
     CoreApiStatus,
     CoreStatus,
@@ -41,6 +40,18 @@ class BaseCurseModel(BaseModel):
     def from_dict(cls, data: dict):
         """Given data returns a hydrated object"""
         return cls.parse_obj(data)
+
+    def to_json(self, fp: TextIO):
+        """dumps object to TextIO"""
+        if not fp.writable():
+            raise Exception("Cannot write to buffer")
+        json.dump(self, fp, default=pydantic_encoder)
+
+    @classmethod
+    def from_json(cls, fp: TextIO):
+        """loads json from buffer returns cls"""
+        data = json.load(fp)
+        return cls.from_dict(data)
 
 
 class BaseRequest(BaseCurseModel):
@@ -328,7 +339,12 @@ class ModLinks(BaseCurseModel):
 
 
 class Mod(BaseRequest):
-    """https://docs.curseforge.com/#tocS_Mod"""
+    """https://docs.curseforge.com/#tocS_Mod
+
+    allowModDistribution : bool | None : If none the mod download url is not available for download
+
+    isAvailable : bool : True if the mod can be searched for
+    """
 
     id: int
     gameId: int
@@ -351,14 +367,14 @@ class Mod(BaseRequest):
     dateCreated: datetime
     dateModified: datetime
     dateReleased: datetime
-    allowModDistribution: bool | None  # API status
+    allowModDistribution: bool | None
     gamePopularityRank: int
-    isAvailable: bool  # search status
+    isAvailable: bool
     thumbsUpCount: int
 
     def download_latest(self, **kwargs) -> bytes:
         if len(self.latestFiles) == 0:
-            raise Exception("")
+            raise Exception("No latest files")
         return self._download(self.latestFiles[0].downloadUrl, **kwargs)
 
 
