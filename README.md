@@ -37,6 +37,7 @@ Currently implemented:
 
 To Do:
 
+- Fix to be usable with pydantic based ORM's
 - Async Rewrite
 - Port to python 3.8 and 3.9
 - Address all TODO's

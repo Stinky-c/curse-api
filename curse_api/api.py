@@ -17,6 +17,7 @@ from .models import (
     MinecraftModLoaderVersion,
     Mod,
     Pagination,
+    BaseCurseModel,
 )
 
 """
@@ -188,14 +189,14 @@ class CurseAPI:
         """
         res = self._api._get("/v1/minecraft/version")
         res.raise_for_status()
-        return [MinecraftGameVersion.from_dict(x) for x in res.json()["data"]]
+        return self.hydrate_list(res.json()["data"], MinecraftGameVersion)
 
     def get_specific_minecraft_version(
         self, gameVersionString: str
     ) -> MinecraftGameVersion:
         res = self._api._get(f"/v1/minecraft/version/{gameVersionString}")
         res.raise_for_status()
-        return MinecraftGameVersion.from_dict(res.json()["data"])
+        return self.hydrate(res.json()["data"], MinecraftGameVersion)
 
     def modloader_versions(self) -> List[MinecraftModLoaderIndex]:
         """
@@ -204,14 +205,14 @@ class CurseAPI:
         """
         res = self._api._get("/v1/minecraft/modloader", params={"includeAll": True})
         res.raise_for_status()
-        return [MinecraftModLoaderIndex.from_dict(x) for x in res.json()["data"]]
+        return self.hydrate_list(res.json()["data"], MinecraftModLoaderIndex)
 
     def get_specific_minecraft_modloader(
         self, modLoaderName: str
     ) -> MinecraftModLoaderVersion:
         res = self._api._get(f"/v1/minecraft/modloader/{modLoaderName}")
         res.raise_for_status()
-        return MinecraftModLoaderVersion.from_dict(res.json()["data"])
+        return self.hydrate(res.json()["data"], MinecraftModLoaderVersion)
 
     def search_mods(
         self,
@@ -232,14 +233,14 @@ class CurseAPI:
 
 
         Args:
-            gameId (Games, optional): Filter by game id.. Defaults to Games.Minecraft.
+            gameId (Games, optional): Filter by game id. Defaults to `Games.Minecraft`.
             classId (int, optional): Filter by section id (discoverable via Categories). Defaults to None.
             categoryId (MinecraftCategories, optional): Filter by category id. Defaults to None.
             gameVersion (str, optional): Filter by game version string. Defaults to None.
             searchFilter (str, optional): Filter by free text search in the mod name and author. Defaults to None.
-            sortField (ModsSearchSortField, optional): Filter by ModsSearchSortField enumeration. Defaults to None.
-            sortOrder (SortOrder, optional): Filter by SortOrder enumeration. Defaults to None.
-            modLoaderType (ModLoaderType, optional): Filter only mods associated to a given modloader. Must be coupled with gameVersion.. Defaults to None.
+            sortField (ModsSearchSortField, optional): Filter by `ModsSearchSortField` enumeration. Defaults to None.
+            sortOrder (SortOrder, optional): Filter by `SortOrder` enumeration. Defaults to None.
+            modLoaderType (ModLoaderType, optional): Filter only mods associated to a given modloader. Must be coupled with gameVersion. Defaults to None.
             gameVersionTypeId (int, optional): Filter only mods that contain files tagged with versions of the given gameVersionTypeId. Defaults to None.
             slug (str, optional): Filter by slug (coupled with classId will result in a unique result). Defaults to None.
             index (int, optional): A zero based index of the first item to include in the response. Defaults to 0.
@@ -269,19 +270,19 @@ class CurseAPI:
         )
         res.raise_for_status()
         d = res.json()
-        return [Mod.from_dict(x) for x in d["data"]], Pagination.from_dict(
-            d["pagination"]
+        return self.hydrate_list(d["data"], Mod), self.hydrate(
+            d["pagination"], Pagination
         )
 
     def get_mod(self, modId: int) -> Mod:
         res = self._api._get(f"/v1/mods/{modId}")
         res.raise_for_status()
-        return Mod.from_dict(res.json()["data"])
+        return self.hydrate(res.json()["data"], Mod)
 
     def get_mods(self, modIdList: list[int]) -> list[Mod]:
         res = self._api._post("/v1/mods", params={"modIds": modIdList})
         res.raise_for_status()
-        return [Mod.from_dict(x) for x in res.json()["data"]]
+        return self.hydrate_list(res.json()["data"], Mod)
 
     def get_mod_description(self, modId: int) -> str:
         res = self._api._get(f"/v1/mods/{modId}/description")
@@ -294,12 +295,12 @@ class CurseAPI:
         I dont really know a use for this, but I can easily support it."""
         res = self._api._post("/v1/fingerprints", params={"fingerprints": fingerprints})
         res.raise_for_status()
-        return FingerprintsMatchesResult.from_dict(res.json()["data"])
+        return self.hydrate(res.json()["data"], FingerprintsMatchesResult)
 
     def get_files(self, fileList: list[int]) -> list[File]:
         res = self._api._post("/v1/mods/files", params={"fileIds": fileList})
         res.raise_for_status()
-        return [File.from_dict(x) for x in res.json()["data"]]
+        return self.hydrate_list(res.json()["data"], File)
 
     def get_mod_files(
         self,
@@ -322,14 +323,14 @@ class CurseAPI:
         )
         res.raise_for_status()
         d = res.json()
-        return [File.from_dict(x) for x in d["data"]], Pagination.from_dict(
-            d["pagination"]
+        return self.hydrate_list(d["data"], File), self.hydrate(
+            d["pagination"], Pagination
         )
 
     def get_mod_file(self, modId: int, fileId: int) -> File:
         res = self._api._get(f"/v1/mods/{modId}/files/{fileId}")
         res.raise_for_status()
-        return File.from_dict(res.json()["data"])
+        return self.hydrate(res.json()["data"], File)
 
     def get_mod_file_changelog(self, modId: int, fileId: int) -> str:
         res = self._api._get(f"/v1/mods/{modId}/files/{fileId}/changelog")
@@ -340,3 +341,13 @@ class CurseAPI:
         res = self._api._get(f"/v1/mods/{modId}/files/{fileId}/download-url")
         res.raise_for_status()
         return res.json()["data"]
+
+    @staticmethod
+    def hydrate(data: dict, model: Type[BaseCurseModel]):
+        """hydrates a model from a dict"""
+        return model.from_dict(data)
+
+    @staticmethod
+    def hydrate_list(data: List[dict], model: Type[BaseCurseModel]):
+        """hydrates a list of models from  a list of dicts"""
+        return [model.from_dict(i) for i in data]

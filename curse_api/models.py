@@ -69,7 +69,7 @@ class BaseRequest(BaseCurseModel):
 # misc
 
 
-class SortableGameVersion(BaseCurseModel):
+class SortableGameVersion(BaseRequest):
     """https://docs.curseforge.com/#tocS_SortableGameVersion"""
 
     gameVersionName: str
@@ -79,7 +79,7 @@ class SortableGameVersion(BaseCurseModel):
     gameVersionTypeId: Optional[int]
 
 
-class Category(BaseCurseModel):
+class Category(BaseRequest):
     """https://docs.curseforge.com/#tocS_Category"""
 
     id: int
@@ -118,7 +118,7 @@ class MinecraftGameVersion(BaseRequest):
         return self._download(self.jsonDownloadUrl, **kwargs)
 
 
-class MinecraftModLoaderIndex(BaseCurseModel):
+class MinecraftModLoaderIndex(BaseRequest):
     "https://docs.curseforge.com/#tocS_MinecraftModLoaderIndex"
     name: str
     gameVersion: str
@@ -176,21 +176,21 @@ class MinecraftModLoaderVersion(BaseRequest):
 # file
 
 
-class FileDependency(BaseCurseModel):
+class FileDependency(BaseRequest):
     """https://docs.curseforge.com/#tocS_FileDependency"""
 
     modId: int
     relationType: FileRelationType
 
 
-class FileHash(BaseCurseModel):
+class FileHash(BaseRequest):
     """https://docs.curseforge.com/#tocS_FileHash"""
 
     value: str
     algo: HashAlgo
 
 
-class FileIndex(BaseCurseModel):
+class FileIndex(BaseRequest):
     """https://docs.curseforge.com/#tocS_FileIndex"""
 
     gameVersion: str
@@ -201,7 +201,7 @@ class FileIndex(BaseCurseModel):
     modLoader: Optional[ModLoaderType]
 
 
-class FileModule(BaseCurseModel):
+class FileModule(BaseRequest):
     """https://docs.curseforge.com/#tocS_FileModule"""
 
     name: str
@@ -239,7 +239,7 @@ class File(BaseRequest):
         return self._download(self.downloadUrl, **kwargs)
 
 
-class FingerprintFuzzyMatch(BaseCurseModel):
+class FingerprintFuzzyMatch(BaseRequest):
     """https://docs.curseforge.com/#tocS_FingerprintFuzzyMatch"""
 
     id: int
@@ -248,7 +248,8 @@ class FingerprintFuzzyMatch(BaseCurseModel):
     fingerprints: List[int]
 
 
-class FingerprintMatch(BaseCurseModel):
+
+class FingerprintMatch(BaseRequest):
     """https://docs.curseforge.com/#tocS_FingerprintMatch"""
 
     id: int
@@ -256,7 +257,7 @@ class FingerprintMatch(BaseCurseModel):
     latestFiles: List[File]
 
 
-class FingerprintsMatchesResult(BaseCurseModel):
+class FingerprintsMatchesResult(BaseRequest):
     """https://docs.curseforge.com/#tocS_FingerprintsMatchesResult"""
 
     isCacheBuilt: bool
@@ -268,7 +269,7 @@ class FingerprintsMatchesResult(BaseCurseModel):
     unmatchedFingerprints: Optional[List[int]]
 
 
-class FolderFingerprint(BaseCurseModel):
+class FolderFingerprint(BaseRequest):
     """https://docs.curseforge.com/#tocS_FolderFingerprint"""
 
     foldername: str
@@ -278,7 +279,7 @@ class FolderFingerprint(BaseCurseModel):
 # game
 
 
-class GameAssets(BaseCurseModel):
+class GameAssets(BaseRequest):
     """https://docs.curseforge.com/#tocS_GameAssets"""
 
     iconUrl: str
@@ -286,7 +287,7 @@ class GameAssets(BaseCurseModel):
     coverUrl: str
 
 
-class Game(BaseCurseModel):
+class Game(BaseRequest):
     """https://docs.curseforge.com/#tocS_Game"""
 
     id: int
@@ -298,7 +299,7 @@ class Game(BaseCurseModel):
     apiStatus: CoreApiStatus
 
 
-class GameVersionType(BaseCurseModel):
+class GameVersionType(BaseRequest):
     """https://docs.curseforge.com/#tocS_GameVersionsByType"""
 
     id: int
@@ -310,7 +311,7 @@ class GameVersionType(BaseCurseModel):
 # mod
 
 
-class ModAsset(BaseCurseModel):
+class ModAsset(BaseRequest):
     """https://docs.curseforge.com/#tocS_ModAsset"""
 
     id: int
@@ -321,7 +322,7 @@ class ModAsset(BaseCurseModel):
     url: str
 
 
-class ModAuthor(BaseCurseModel):
+class ModAuthor(BaseRequest):
     """https://docs.curseforge.com/#tocS_ModAuthor"""
 
     id: int
@@ -329,7 +330,7 @@ class ModAuthor(BaseCurseModel):
     url: str
 
 
-class ModLinks(BaseCurseModel):
+class ModLinks(BaseRequest):
     """https://docs.curseforge.com/#tocS_ModLinks"""
 
     websiteUrl: Optional[str]
@@ -381,7 +382,7 @@ class Mod(BaseRequest):
 # misc
 
 
-class FeaturedModsResponse(BaseCurseModel):
+class FeaturedModsResponse(BaseRequest):
     """https://docs.curseforge.com/#tocS_FeaturedModsResponse"""
 
     featured: List[Mod]
@@ -389,7 +390,7 @@ class FeaturedModsResponse(BaseCurseModel):
     recentlyUpdated: List[Mod]
 
 
-class Pagination(BaseCurseModel):
+class Pagination(BaseRequest):
     """https://docs.curseforge.com/#tocS_Pagination"""
 
     index: int
