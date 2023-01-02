@@ -24,7 +24,7 @@ v_1_19_3_fabric_recommended = [
 ][0]
 
 # NOTE the modloader version list is large and not cached
-# dump to disk if you wish to save network resources
+# dump to disk or otherways if you wish to save network resources
 with open("versions.json", "w") as f:
     from pydantic.json import pydantic_encoder
     # we have a list of pydantic objects

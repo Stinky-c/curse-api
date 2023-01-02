@@ -1,4 +1,4 @@
-from typing import Callable, List, Optional, Type
+from typing import Callable, List, Optional, Type, Tuple
 
 import httpx
 
@@ -124,12 +124,12 @@ class APIFactory:
         return r
 
     @property
-    def response_hooks(self) -> list[Callable]:
+    def response_hooks(self) -> List[Callable]:
         """response event hooks"""
         return self._sess.event_hooks["response"]
 
     @property
-    def request_hooks(self) -> list[Callable]:
+    def request_hooks(self) -> List[Callable]:
         """request event hooks"""
         return self._sess.event_hooks["request"]
 
@@ -228,7 +228,7 @@ class CurseAPI:
         slug: Optional[str] = None,
         index: Optional[int] = 0,
         pageSize: Optional[int] = 50,
-    ) -> tuple[List[Mod], Pagination]:
+    ) -> Tuple[List[Mod], Pagination]:
         """https://docs.curseforge.com/#search-mods
 
 
@@ -247,7 +247,7 @@ class CurseAPI:
             pageSize (int, optional): The number of items to include in the response. Defaults to 50.
 
         Returns:
-            tuple[List[Mod], Pagination]: A list of mods and pagination data
+            tuple[List[Mod], Pagination]: A List of mods and pagination data
         """
         build = {
             "gameId": gameId.value,
@@ -279,7 +279,7 @@ class CurseAPI:
         res.raise_for_status()
         return self.hydrate(res.json()["data"], Mod)
 
-    def get_mods(self, modIdList: list[int]) -> list[Mod]:
+    def get_mods(self, modIdList: List[int]) -> List[Mod]:
         res = self._api._post("/v1/mods", params={"modIds": modIdList})
         res.raise_for_status()
         return self.hydrate_list(res.json()["data"], Mod)
@@ -289,7 +289,7 @@ class CurseAPI:
         res.raise_for_status()
         return res.json()["data"]
 
-    def get_fingerprints(self, fingerprints: list[int]):
+    def get_fingerprints(self, fingerprints: List[int]):
         """Only supports addons.
         Minecraft modpacks do not function
         I dont really know a use for this, but I can easily support it."""
@@ -297,7 +297,7 @@ class CurseAPI:
         res.raise_for_status()
         return self.hydrate(res.json()["data"], FingerprintsMatchesResult)
 
-    def get_files(self, fileList: list[int]) -> list[File]:
+    def get_files(self, fileList: List[int]) -> List[File]:
         res = self._api._post("/v1/mods/files", params={"fileIds": fileList})
         res.raise_for_status()
         return self.hydrate_list(res.json()["data"], File)
@@ -310,7 +310,7 @@ class CurseAPI:
         gameVersionTypeId: Optional[int] = None,
         index: int = 0,
         pageSize: int = 50,
-    ) -> tuple[list[File], Pagination]:
+    ) -> Tuple[List[File], Pagination]:
         res = self._api._get(
             f"/v1/mods/{modId}/files",
             params={
@@ -349,5 +349,5 @@ class CurseAPI:
 
     @staticmethod
     def hydrate_list(data: List[dict], model: Type[BaseCurseModel]):
-        """hydrates a list of models from  a list of dicts"""
+        """hydrates a list of models from a list of dicts"""
         return [model.from_dict(i) for i in data]

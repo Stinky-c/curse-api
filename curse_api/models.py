@@ -1,7 +1,7 @@
 from datetime import datetime
 from pydantic import BaseModel
 from pathlib import Path
-from typing import Any, List, Optional, TypeVar, TextIO
+from typing import Any, List, Optional, TextIO
 import json
 from pydantic.json import pydantic_encoder
 import httpx  # type: ignore
@@ -21,9 +21,9 @@ from .enums import (
 
 """
 schemas can be found at https://docs.curseforge.com/#schemas
-If exceptions to the format or naming conventions there will be a comment detailing the change
+If exceptions to the format or naming conventions there will be a comment detailing the changes
 """
-T = TypeVar("T")
+
 # TODO: rewrite download handling code
 class APIBanned(Exception):
     """In case a mod is banned from interacting with the API"""
@@ -223,7 +223,7 @@ class File(BaseRequest):
     fileDate: datetime
     fileLength: int
     downloadCount: int
-    downloadUrl: str | None
+    downloadUrl: Optional[str]
     gameVersions: List[str]
     sortableGameVersions: List[SortableGameVersion]
     dependencies: List[FileDependency]
@@ -246,7 +246,6 @@ class FingerprintFuzzyMatch(BaseRequest):
     file: File
     latestFiles: List[File]
     fingerprints: List[int]
-
 
 
 class FingerprintMatch(BaseRequest):
@@ -368,7 +367,7 @@ class Mod(BaseRequest):
     dateCreated: datetime
     dateModified: datetime
     dateReleased: datetime
-    allowModDistribution: bool | None
+    allowModDistribution: Optional[bool]
     gamePopularityRank: int
     isAvailable: bool
     thumbsUpCount: int
