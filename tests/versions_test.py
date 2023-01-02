@@ -1,9 +1,11 @@
-from curse_api import CurseAPI
+from curse_api import AsyncCurseAPI
+import pytest
 
 
-def test_get_mod_file(api: CurseAPI):
+@pytest.mark.asyncio
+async def test_get_mod_file(api: AsyncCurseAPI):
     pid = 60089
     fid = 3871353
-    res = api.get_mod_file(pid, fid)
+    res = await api.get_mod_file(pid, fid)
     assert res.id == fid, "Wrong File"
     assert res.modId == pid, "Wrong Mod"
