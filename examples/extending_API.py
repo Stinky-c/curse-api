@@ -1,20 +1,27 @@
-import os
 from curse_api import CurseAPI, APIFactory
+import os
+import asyncio
 
 
 class MyFactory(APIFactory):
     # A simple factory that prints the url and http method
 
-    def _get(self, url, params=None, **kwargs):
+    async def _get(self, url, params=None, **kwargs):
         print("GET", url)
-        return super()._get(url, params, **kwargs)
+        return await super()._get(url, params, **kwargs)
 
-    def _post(self, url, params=None, **kwargs):
+    async def _post(self, url, params=None, **kwargs):
         print("POST", url)
-        return super()._post(url, params, **kwargs)
+        return await super()._post(url, params, **kwargs)
 
 
-api = CurseAPI(os.environ["CF_API_KEY"], factory=MyFactory)
+async def main():
+    api = CurseAPI(os.environ["CF_API_KEY"], factory=MyFactory)
 
-api.get_mod(3358)
-api.search_mods(slug="jei")
+    mod = await api.get_mod(3358)
+    search = await api.search_mods(slug="jei")
+
+    await api.close() # We close the API gracefully
+
+
+asyncio.run(main())

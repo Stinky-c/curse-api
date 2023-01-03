@@ -1,10 +1,17 @@
 from curse_api import CurseAPI
 import os
+import asyncio
 
-api = CurseAPI(os.environ["CF_API_KEY"])
 
-mod_l, page_data = api.search_mods(slug="jei")
-latest = mod_l[0].latestFiles[0]
+async def main():
+    async with CurseAPI(os.environ["CF_API_KEY"]) as api:
 
-with open(latest.fileName, "wb") as f:
-    f.write(latest.download())
+        mod_l, page_data = await api.search_mods(slug="jei")
+        latest = mod_l[0].latestFiles[0]
+
+        with open(latest.fileName, "wb") as f:
+            f.write(latest.download())
+
+
+if __name__ == "__main__":
+    asyncio.run(main())

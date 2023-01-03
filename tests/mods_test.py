@@ -1,16 +1,16 @@
-from curse_api import Games, AsyncCurseAPI
+from curse_api import Games, CurseAPI
 from curse_api.models import Mod, Pagination
 import pytest
 
 
 @pytest.mark.asyncio
-async def test_health_check(api: AsyncCurseAPI):
+async def test_health_check(api: CurseAPI):
     res = await api.health_check()
     assert res.status_code == 200, "API unavailable"
 
 
 @pytest.mark.asyncio
-async def test_get_mod(api: AsyncCurseAPI):
+async def test_get_mod(api: CurseAPI):
     id = 285109
     res = await api.get_mod(id)
     assert isinstance(res, Mod), "Invalid type"
@@ -19,7 +19,7 @@ async def test_get_mod(api: AsyncCurseAPI):
 
 
 @pytest.mark.asyncio
-async def test_get_mods(api: AsyncCurseAPI):
+async def test_get_mods(api: CurseAPI):
     id = 285109
     res = await api.get_mods([id, 452013])
     assert isinstance(res, list), "Not a list"
@@ -28,7 +28,7 @@ async def test_get_mods(api: AsyncCurseAPI):
 
 
 @pytest.mark.asyncio
-async def test_search_mods_slug(api: AsyncCurseAPI):
+async def test_search_mods_slug(api: CurseAPI):
     res, page = await api.search_mods(Games.Minecraft, slug="jei")
     assert isinstance(res, list), "Not a list"
     assert len(res) > 0, "No mods in list"
@@ -36,7 +36,7 @@ async def test_search_mods_slug(api: AsyncCurseAPI):
 
 
 @pytest.mark.asyncio
-async def test_search_mods_page_size(api: AsyncCurseAPI):
+async def test_search_mods_page_size(api: CurseAPI):
     res, page = await api.search_mods(Games.Minecraft, slug="jei", pageSize=5)
     assert page.pageSize <= 5, "Page data is too long"
     assert page.resultCount == len(res), "The api returned invalid page data"

@@ -3,7 +3,7 @@ name = "curse-api"
 repository = "https://github.com/Stinky-c/curse-api"
 homepage = "https://github.com/Stinky-c/curse-api"
 readme = "README.md"
-version = "0.5.0"
+version = "1.0.0"
 description = "A simple curseforge api wrapper"
 authors = ["Stinky-c <60587749+Stinky-c@users.noreply.github.com>"]
 license = "MIT"
@@ -37,7 +37,7 @@ build-backend = "poetry.core.masonry.api"
 asyncio_mode = "auto"
 
 [tool.ruff]
-extend-exclude = [".venv/", "examples/"]
+extend-exclude = [".venv", "examples", "tests"]
 ignore-init-module-imports = true
 extend-ignore = ["E501"]
 extend-select = ["T201"]

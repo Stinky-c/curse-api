@@ -1,11 +1,11 @@
-from curse_api import AsyncCurseAPI
+from curse_api import CurseAPI
 from dotenv import load_dotenv
 import pytest
 
 load_dotenv()
 
 @pytest.mark.asyncio
-async def test_get_mod_file(api: AsyncCurseAPI):
+async def test_get_mod_file(api: CurseAPI):
     pid = 60089
     fid = 3871353
     res = await api.get_mod_file(pid, fid)
@@ -14,7 +14,7 @@ async def test_get_mod_file(api: AsyncCurseAPI):
 
 
 @pytest.mark.asyncio
-async def test_get_mod_files(api: AsyncCurseAPI):  # notice the s!
+async def test_get_mod_files(api: CurseAPI):  # notice the s!
     pid = 60089
     res, page = await api.get_mod_files(pid)
     assert isinstance(res, list)

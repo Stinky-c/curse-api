@@ -1,4 +1,4 @@
-from curse_api import AsyncCurseAPI
+from curse_api import CurseAPI
 import os
 import pytest
 import asyncio
@@ -9,7 +9,7 @@ load_dotenv()
 
 @pytest.fixture(scope="session")
 def api():
-    yield AsyncCurseAPI(os.environ["CF_API_KEY"], timeout=8)
+    yield CurseAPI(os.environ["CF_API_KEY"], timeout=8)
 
 @pytest.fixture(scope="session")
 def event_loop():

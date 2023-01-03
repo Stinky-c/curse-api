@@ -47,7 +47,7 @@ class APIFactory:
             "Accept": "application/json",
             "user-agent": user_agent,
         }
-        self._sess = httpx.Client(
+        self._sess = httpx.AsyncClient(
             base_url=base_url,
             headers=_headers,
             **settings,
@@ -58,7 +58,13 @@ class APIFactory:
         todict["read"] = 15
         self._sess.timeout = httpx.Timeout(**todict)
 
-    def _get(self, url: str, params: Optional[dict] = None, **kwargs) -> httpx.Response:
+    async def close(self):
+        await self._sess.aclose()
+        ...
+
+    async def _get(
+        self, url: str, params: Optional[dict] = None, **kwargs
+    ) -> httpx.Response:
         """internal get method
 
         Args:
@@ -66,10 +72,10 @@ class APIFactory:
             params (dict): a dict of parameters
             kwargs (any): unpacked into requests get method
         """
-        res = self._sess.get(url, params=params, **kwargs)
+        res = await self._sess.get(url, params=params, **kwargs)
         return res
 
-    def _post(
+    async def _post(
         self, url: str, params: Optional[dict] = None, **kwargs
     ) -> httpx.Response:
         """internal post method
@@ -79,7 +85,7 @@ class APIFactory:
             params (dict): the json data to send
             kwargs (any): unpacked into requests get method
         """
-        res = self._sess.post(url, json=params, **kwargs)
+        res = await self._sess.post(url, json=params, **kwargs)
         return res
 
     @property
@@ -149,7 +155,7 @@ class APIFactory:
 
 
 class CurseAPI:
-    """The main class for api requests
+    """The main class for api requests.
     Cannot handle the download of API banned mods
 
     """
@@ -160,6 +166,7 @@ class CurseAPI:
         base_url: str = "https://api.curseforge.com",
         user_agent: str = "stinky-c/curse-api",
         factory: Type[APIFactory] = APIFactory,
+        # loop: asyncio.AbstractEventLoop = asyncio.get_event_loop(), # Do I really need this?
         **settings,
     ) -> None:
         self._api: APIFactory = factory(
@@ -179,42 +186,44 @@ class CurseAPI:
     def api(self):
         return self._api
 
-    def health_check(self, **k) -> httpx.Response:
-        res = self._api._get("/")
+    async def health_check(self, **k) -> httpx.Response:
+        res = await self._api._get("/")
         return res
 
-    def minecraft_versions(self) -> List[MinecraftGameVersion]:
+    async def minecraft_versions(self) -> List[MinecraftGameVersion]:
         """Returns all minecraft version data from curseforge.
         Use `get_specific_minecraft_version` with the game version string to get more detailed data.
         """
-        res = self._api._get("/v1/minecraft/version")
+        res = await self._api._get("/v1/minecraft/version")
         res.raise_for_status()
         return self.hydrate_list(res.json()["data"], MinecraftGameVersion)
 
-    def get_specific_minecraft_version(
+    async def get_specific_minecraft_version(
         self, gameVersionString: str
     ) -> MinecraftGameVersion:
-        res = self._api._get(f"/v1/minecraft/version/{gameVersionString}")
+        res = await self._api._get(f"/v1/minecraft/version/{gameVersionString}")
         res.raise_for_status()
         return self.hydrate(res.json()["data"], MinecraftGameVersion)
 
-    def modloader_versions(self) -> List[MinecraftModLoaderIndex]:
+    async def modloader_versions(self) -> List[MinecraftModLoaderIndex]:
         """
         Returns all minecraft modloader data from curseforge.
         Use `get_specific_minecraft_modloader` with the slug to get more detailed data.
         """
-        res = self._api._get("/v1/minecraft/modloader", params={"includeAll": True})
+        res = await self._api._get(
+            "/v1/minecraft/modloader", params={"includeAll": True}
+        )
         res.raise_for_status()
         return self.hydrate_list(res.json()["data"], MinecraftModLoaderIndex)
 
-    def get_specific_minecraft_modloader(
+    async def get_specific_minecraft_modloader(
         self, modLoaderName: str
     ) -> MinecraftModLoaderVersion:
-        res = self._api._get(f"/v1/minecraft/modloader/{modLoaderName}")
+        res = await self._api._get(f"/v1/minecraft/modloader/{modLoaderName}")
         res.raise_for_status()
         return self.hydrate(res.json()["data"], MinecraftModLoaderVersion)
 
-    def search_mods(
+    async def search_mods(
         self,
         gameId: Games = Games.Minecraft,
         classId: Optional[int] = None,
@@ -264,7 +273,7 @@ class CurseAPI:
             "pageSize": pageSize,
         }
 
-        res = self._api._get(
+        res = await self._api._get(
             "/v1/mods/search",
             params={k: v for k, v in build.items() if v is not None},
         )
@@ -274,35 +283,37 @@ class CurseAPI:
             d["pagination"], Pagination
         )
 
-    def get_mod(self, modId: int) -> Mod:
-        res = self._api._get(f"/v1/mods/{modId}")
+    async def get_mod(self, modId: int) -> Mod:
+        res = await self._api._get(f"/v1/mods/{modId}")
         res.raise_for_status()
         return self.hydrate(res.json()["data"], Mod)
 
-    def get_mods(self, modIdList: List[int]) -> List[Mod]:
-        res = self._api._post("/v1/mods", params={"modIds": modIdList})
+    async def get_mods(self, modIdList: List[int]) -> List[Mod]:
+        res = await self._api._post("/v1/mods", params={"modIds": modIdList})
         res.raise_for_status()
         return self.hydrate_list(res.json()["data"], Mod)
 
-    def get_mod_description(self, modId: int) -> str:
-        res = self._api._get(f"/v1/mods/{modId}/description")
+    async def get_mod_description(self, modId: int) -> str:
+        res = await self._api._get(f"/v1/mods/{modId}/description")
         res.raise_for_status()
         return res.json()["data"]
 
-    def get_fingerprints(self, fingerprints: List[int]):
+    async def get_fingerprints(self, fingerprints: List[int]):
         """Only supports addons.
         Minecraft modpacks do not function
         I dont really know a use for this, but I can easily support it."""
-        res = self._api._post("/v1/fingerprints", params={"fingerprints": fingerprints})
+        res = await self._api._post(
+            "/v1/fingerprints", params={"fingerprints": fingerprints}
+        )
         res.raise_for_status()
         return self.hydrate(res.json()["data"], FingerprintsMatchesResult)
 
-    def get_files(self, fileList: List[int]) -> List[File]:
-        res = self._api._post("/v1/mods/files", params={"fileIds": fileList})
+    async def get_files(self, fileList: List[int]) -> List[File]:
+        res = await self._api._post("/v1/mods/files", params={"fileIds": fileList})
         res.raise_for_status()
         return self.hydrate_list(res.json()["data"], File)
 
-    def get_mod_files(
+    async def get_mod_files(
         self,
         modId: int,
         gameVersion: Optional[str] = None,
@@ -311,7 +322,7 @@ class CurseAPI:
         index: int = 0,
         pageSize: int = 50,
     ) -> Tuple[List[File], Pagination]:
-        res = self._api._get(
+        res = await self._api._get(
             f"/v1/mods/{modId}/files",
             params={
                 "gameVersion": gameVersion,
@@ -327,20 +338,23 @@ class CurseAPI:
             d["pagination"], Pagination
         )
 
-    def get_mod_file(self, modId: int, fileId: int) -> File:
-        res = self._api._get(f"/v1/mods/{modId}/files/{fileId}")
+    async def get_mod_file(self, modId: int, fileId: int) -> File:
+        res = await self._api._get(f"/v1/mods/{modId}/files/{fileId}")
         res.raise_for_status()
         return self.hydrate(res.json()["data"], File)
 
-    def get_mod_file_changelog(self, modId: int, fileId: int) -> str:
-        res = self._api._get(f"/v1/mods/{modId}/files/{fileId}/changelog")
+    async def get_mod_file_changelog(self, modId: int, fileId: int) -> str:
+        res = await self._api._get(f"/v1/mods/{modId}/files/{fileId}/changelog")
         res.raise_for_status()
         return res.json()["data"]
 
-    def get_mod_file_download_url(self, modId: int, fileId: int) -> str:
-        res = self._api._get(f"/v1/mods/{modId}/files/{fileId}/download-url")
+    async def get_mod_file_download_url(self, modId: int, fileId: int) -> str:
+        res = await self._api._get(f"/v1/mods/{modId}/files/{fileId}/download-url")
         res.raise_for_status()
         return res.json()["data"]
+
+    async def close(self):
+        return await self._api.close()
 
     @staticmethod
     def hydrate(data: dict, model: Type[BaseCurseModel]):
@@ -351,3 +365,9 @@ class CurseAPI:
     def hydrate_list(data: List[dict], model: Type[BaseCurseModel]):
         """hydrates a list of models from a list of dicts"""
         return [model.from_dict(i) for i in data]
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *excinfo):
+        await self.close()
