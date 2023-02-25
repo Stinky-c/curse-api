@@ -1,5 +1,6 @@
 from curse_api import Games, CurseAPI
 from curse_api.models import Mod, Pagination
+from curse_api.enums import MinecraftCategories
 import pytest
 
 
@@ -14,7 +15,6 @@ async def test_get_mod(api: CurseAPI):
     id = 285109
     res = await api.get_mod(id)
     assert isinstance(res, Mod), "Invalid type"
-    res.download_latest
     assert res.id == id, "Invalid ID"
 
 
@@ -40,6 +40,17 @@ async def test_search_mods_page_size(api: CurseAPI):
     res, page = await api.search_mods(Games.Minecraft, slug="jei", pageSize=5)
     assert page.pageSize <= 5, "Page data is too long"
     assert page.resultCount == len(res), "The api returned invalid page data"
+
+
+@pytest.mark.asyncio
+async def test_search_mods_category(api: CurseAPI):
+    res, _ = await api.search_mods(
+        Games.Minecraft,
+        slug="multiblock-madness",
+        categoryId=MinecraftCategories.Modpacks,
+    )
+    
+    ...
 
 
 # TODO find API banned mod

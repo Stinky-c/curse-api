@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import Enum,IntEnum
 
 
 class ModsSearchSortField(Enum):
@@ -17,7 +17,7 @@ class SortOrder(Enum):
     Descending = "desc"
 
 
-class Games(Enum):
+class Games(IntEnum):
     Minecraft = 432
     Demeo = 78135
     WildStar = 454
@@ -40,7 +40,7 @@ class Games(Enum):
     Rift = 424
 
 
-class MinecraftCategories(Enum):
+class MinecraftCategories(IntEnum):
     Worlds = 17
     Bukkit_Plugins = 5
     Customization = 4546
@@ -50,12 +50,12 @@ class MinecraftCategories(Enum):
     Mods = 6
 
 
-class CoreApiStatus(Enum):
+class CoreApiStatus(IntEnum):
     Private = 1
     Public = 2
 
 
-class CoreStatus(Enum):
+class CoreStatus(IntEnum):
     Draft = 1
     Test = 2
     PendingReview = 3
@@ -64,18 +64,18 @@ class CoreStatus(Enum):
     Live = 6
 
 
-class GameVersionStatus(Enum):
+class GameVersionStatus(IntEnum):
     Approved = 1
     Deleted = 2
     New = 3
 
 
-class GameVersionTypeStatus(Enum):
+class GameVersionTypeStatus(IntEnum):
     Normal = 1
     Deleted = 2
 
 
-class FileRelationType(Enum):
+class FileRelationType(IntEnum):
     EmbeddedLibrary = 1
     OptionalDependency = 2
     RequiredDependency = 3
@@ -84,13 +84,13 @@ class FileRelationType(Enum):
     _Include = 6
 
 
-class FileReleaseType(Enum):
+class FileReleaseType(IntEnum):
     Release = 1
     Beta = 2
     Alpha = 3
 
 
-class FileStatus(Enum):
+class FileStatus(IntEnum):
     Processing = 1
     ChangesRequired = 2
     UnderReview = 3
@@ -108,12 +108,12 @@ class FileStatus(Enum):
     FailedPublishing = 15
 
 
-class HashAlgo(Enum):
+class HashAlgo(IntEnum):
     Sha1 = 1
     Md5 = 2
 
 
-class ModStatus(Enum):
+class ModStatus(IntEnum):
     New = 1
     ChangesRequired = 2
     UnderSoftReview = 3
@@ -126,7 +126,7 @@ class ModStatus(Enum):
     UnderReview = 10
 
 
-class ModLoaderInstallMethod(Enum):
+class ModLoaderInstallMethod(IntEnum):
     ForgeInstaller = 1
     ForgeJarInstall = 2
     ForgeInstaller_v2 = 3

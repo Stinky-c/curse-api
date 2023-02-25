@@ -1,4 +1,4 @@
-from typing import Callable, List, Optional, Type, Tuple
+from typing import Callable, List, Optional, Type, Tuple, Union, Dict, Any, TypeVar
 
 import httpx
 
@@ -24,6 +24,8 @@ from .models import (
 TODO: write more doc strings
 IDEA: make APIFactory a class with class methods and class variables
 """
+
+U = TypeVar("U", bound=BaseCurseModel)
 
 
 class APIFactory:
@@ -176,8 +178,8 @@ class CurseAPI:
         accepts additional kwargs passing to the creation of the factory
 
         Args:
-            API_KEY (str): Required. get one from here: https://docs.curseforge.com/#accessing-the-service.
-            API_BASE (str, optional): An overide of the url base. Defaults to "https://api.curseforge.com".
+            api_key (str): Required. get one from here: https://docs.curseforge.com/#accessing-the-service.
+            base_url (str, optional): An overide of the url base. Defaults to "https://api.curseforge.com".
             user_agent (str, optional): user_agent used for requests. Defaults to "stinky-c/curse-api".
             factory (APIFactory): a factory for handling API requests Defaults to APIFactory.
         """
@@ -186,7 +188,7 @@ class CurseAPI:
     def api(self):
         return self._api
 
-    async def health_check(self, **k) -> httpx.Response:
+    async def health_check(self, **k):
         res = await self._api._get("/")
         return res
 
@@ -357,12 +359,12 @@ class CurseAPI:
         return await self._api.close()
 
     @staticmethod
-    def hydrate(data: dict, model: Type[BaseCurseModel]):
+    def hydrate(data: Dict[Any, Any], model: Type[U]):
         """hydrates a model from a dict"""
         return model.from_dict(data)
 
     @staticmethod
-    def hydrate_list(data: List[dict], model: Type[BaseCurseModel]):
+    def hydrate_list(data: List[Dict[Any, Any]], model: Type[U]):
         """hydrates a list of models from a list of dicts"""
         return [model.from_dict(i) for i in data]
 
