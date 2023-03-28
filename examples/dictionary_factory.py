@@ -1,10 +1,11 @@
 from curse_api import CurseAPI
+from curse_api.clients.httpx import HttpxFactory
 import os
 import asyncio
 
 
 async def main():
-    async with CurseAPI(os.environ["CF_API_KEY"], timeout=8) as api:
+    async with CurseAPI(os.environ["CF_API_KEY"], factory=HttpxFactory) as api:
 
         file = await api.get_mod_file(247217, 2868969)
 

@@ -1,11 +1,21 @@
 from curse_api import CurseAPI, ModLoaderType
+from curse_api.clients.httpx import HttpxFactory
 import os
 import asyncio
 import json
 
+"""
+This example is thoroughly powered using list comprehension. Some tutorials are provided
+
+https://realpython.com/list-comprehension-python/
+https://docs.python.org/3/tutorial/datastructures.html#list-comprehensions
+https://gist.github.com/bkbncn/85b845b955cc6b4eb1d12442fb56df25
+
+"""
+
 
 async def main():
-    async with CurseAPI(os.environ["CF_API_KEY"]) as api:
+    async with CurseAPI(os.environ["CF_API_KEY"], factory=HttpxFactory) as api:
 
         # gets modloader verion from curseforge
         versions = await api.modloader_versions()
@@ -47,9 +57,7 @@ async def main():
 
         # works the same for minecraft version
         mc_versions = await api.minecraft_versions()
-        for i in (
-            i for i in mc_versions if i.versionString == "1.7.2"
-        ):  # creates generator
+        for i in (i for i in mc_versions if i.versionString == "1.7.2"):
             print(i.approved)
 
 

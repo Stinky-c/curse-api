@@ -1,9 +1,7 @@
 import json
 from datetime import datetime
-from pathlib import Path
 from typing import Any, List, Optional, TextIO
 
-import httpx  # type: ignore
 from pydantic import BaseModel
 from pydantic.json import pydantic_encoder
 
@@ -43,11 +41,9 @@ class BaseCurseModel(BaseModel):
         """Given data returns a hydrated object"""
         return cls.parse_obj(data)
 
-    def to_json(self, fp: TextIO):
+    def to_json(self):
         """dumps object to TextIO"""
-        if not fp.writable():
-            raise Exception("Cannot write to buffer")
-        json.dump(self, fp, default=pydantic_encoder)
+        return json.dumps(self, default=pydantic_encoder)
 
     @classmethod
     def from_json(cls, fp: TextIO):
@@ -56,22 +52,10 @@ class BaseCurseModel(BaseModel):
         return cls.from_dict(data)
 
 
-class BaseRequest(BaseCurseModel):
-    def _download(self, url, **kwargs) -> bytes:
-        """Kwargs is passed to httpx.get"""
-        if url is None:
-            raise APIBanned("Mod is unavailable")
-        res = httpx.get(
-            url, follow_redirects=True, **kwargs, timeout=httpx.Timeout(5, read=15)
-        )
-        res.raise_for_status()
-        return res.content
-
-
 # misc
 
 
-class SortableGameVersion(BaseRequest):
+class SortableGameVersion(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_SortableGameVersion"""
 
     gameVersionName: str
@@ -81,7 +65,7 @@ class SortableGameVersion(BaseRequest):
     gameVersionTypeId: Optional[int]
 
 
-class Category(BaseRequest):
+class Category(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_Category"""
 
     id: int
@@ -99,7 +83,7 @@ class Category(BaseRequest):
 # game version
 
 
-class MinecraftGameVersion(BaseRequest):
+class MinecraftGameVersion(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_MinecraftGameVersion"""
 
     id: int
@@ -113,14 +97,8 @@ class MinecraftGameVersion(BaseRequest):
     gameVersionStatus: GameVersionStatus
     gameVersionTypeStatus: GameVersionTypeStatus
 
-    def download_jar(self, **kwargs) -> bytes:
-        return self._download(self.jarDownloadUrl, **kwargs)
 
-    def download_json(self, **kwargs) -> bytes:
-        return self._download(self.jsonDownloadUrl, **kwargs)
-
-
-class MinecraftModLoaderIndex(BaseRequest):
+class MinecraftModLoaderIndex(BaseCurseModel):
     "https://docs.curseforge.com/#tocS_MinecraftModLoaderIndex"
     name: str
     gameVersion: str
@@ -129,14 +107,8 @@ class MinecraftModLoaderIndex(BaseRequest):
     dateModified: datetime
     type: ModLoaderType
 
-    def get(self, headers: dict, url: str = "https://api.curseforge.com"):
-        raise NotImplementedError  # TODO
-        res = httpx.get(url + f"/v1/minecraft/modloader/{self.name}")
-        res.raise_for_status()
-        return res
 
-
-class MinecraftModLoaderVersion(BaseRequest):
+class MinecraftModLoaderVersion(BaseCurseModel):
     "https://docs.curseforge.com/#tocS_MinecraftModLoaderVersion"
     id: int
     gameVersionId: int
@@ -166,33 +138,25 @@ class MinecraftModLoaderVersion(BaseRequest):
     mcGameVersionTypeStatus: GameVersionTypeStatus
     installProfileJson: str
 
-    def download(self, **kwargs) -> bytes:  # download
-        res = httpx.get(self.downloadUrl, **kwargs)
-        res.raise_for_status()
-        return res.content
-
-    def install(self, path: Path) -> Path:  # TODO download to path
-        raise NotImplementedError
-
 
 # file
 
 
-class FileDependency(BaseRequest):
+class FileDependency(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_FileDependency"""
 
     modId: int
     relationType: FileRelationType
 
 
-class FileHash(BaseRequest):
+class FileHash(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_FileHash"""
 
     value: str
     algo: HashAlgo
 
 
-class FileIndex(BaseRequest):
+class FileIndex(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_FileIndex"""
 
     gameVersion: str
@@ -203,14 +167,14 @@ class FileIndex(BaseRequest):
     modLoader: Optional[ModLoaderType]
 
 
-class FileModule(BaseRequest):
+class FileModule(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_FileModule"""
 
     name: str
     fingerprint: int
 
 
-class File(BaseRequest):
+class File(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_File"""
 
     id: int
@@ -237,11 +201,8 @@ class File(BaseRequest):
     fileFingerprint: int
     modules: List[FileModule]
 
-    def download(self, **kwargs) -> bytes:
-        return self._download(self.downloadUrl, **kwargs)
 
-
-class FingerprintFuzzyMatch(BaseRequest):
+class FingerprintFuzzyMatch(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_FingerprintFuzzyMatch"""
 
     id: int
@@ -250,7 +211,7 @@ class FingerprintFuzzyMatch(BaseRequest):
     fingerprints: List[int]
 
 
-class FingerprintMatch(BaseRequest):
+class FingerprintMatch(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_FingerprintMatch"""
 
     id: int
@@ -258,7 +219,7 @@ class FingerprintMatch(BaseRequest):
     latestFiles: List[File]
 
 
-class FingerprintsMatchesResult(BaseRequest):
+class FingerprintsMatchesResult(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_FingerprintsMatchesResult"""
 
     isCacheBuilt: bool
@@ -270,7 +231,7 @@ class FingerprintsMatchesResult(BaseRequest):
     unmatchedFingerprints: Optional[List[int]]
 
 
-class FolderFingerprint(BaseRequest):
+class FolderFingerprint(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_FolderFingerprint"""
 
     foldername: str
@@ -280,7 +241,7 @@ class FolderFingerprint(BaseRequest):
 # game
 
 
-class GameAssets(BaseRequest):
+class GameAssets(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_GameAssets"""
 
     iconUrl: str
@@ -288,7 +249,7 @@ class GameAssets(BaseRequest):
     coverUrl: str
 
 
-class Game(BaseRequest):
+class Game(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_Game"""
 
     id: int
@@ -300,7 +261,7 @@ class Game(BaseRequest):
     apiStatus: CoreApiStatus
 
 
-class GameVersionType(BaseRequest):
+class GameVersionType(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_GameVersionsByType"""
 
     id: int
@@ -312,7 +273,7 @@ class GameVersionType(BaseRequest):
 # mod
 
 
-class ModAsset(BaseRequest):
+class ModAsset(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_ModAsset"""
 
     id: int
@@ -323,7 +284,7 @@ class ModAsset(BaseRequest):
     url: str
 
 
-class ModAuthor(BaseRequest):
+class ModAuthor(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_ModAuthor"""
 
     id: int
@@ -331,7 +292,7 @@ class ModAuthor(BaseRequest):
     url: str
 
 
-class ModLinks(BaseRequest):
+class ModLinks(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_ModLinks"""
 
     websiteUrl: Optional[str]
@@ -340,7 +301,7 @@ class ModLinks(BaseRequest):
     sourceUrl: Optional[str]
 
 
-class Mod(BaseRequest):
+class Mod(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_Mod
 
     allowModDistribution : bool | None : If none the mod download url is not available for download
@@ -374,16 +335,11 @@ class Mod(BaseRequest):
     isAvailable: bool
     thumbsUpCount: int
 
-    def download_latest(self, **kwargs) -> bytes:
-        if len(self.latestFiles) == 0:
-            raise Exception("No latest files")
-        return self._download(self.latestFiles[0].downloadUrl, **kwargs)
-
 
 # misc
 
 
-class FeaturedModsResponse(BaseRequest):
+class FeaturedModsResponse(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_FeaturedModsResponse"""
 
     featured: List[Mod]
@@ -391,7 +347,7 @@ class FeaturedModsResponse(BaseRequest):
     recentlyUpdated: List[Mod]
 
 
-class Pagination(BaseRequest):
+class Pagination(BaseCurseModel):
     """https://docs.curseforge.com/#tocS_Pagination"""
 
     index: int

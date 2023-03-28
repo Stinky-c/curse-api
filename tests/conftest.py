@@ -1,4 +1,6 @@
 from curse_api import CurseAPI
+from curse_api.clients.httpx import HttpxFactory
+from curse_api.clients.aiohttp import AiohttpFactory
 import os
 import pytest
 import asyncio
@@ -14,8 +16,8 @@ def event_loop():
     loop.close()
 
 
-@pytest.fixture(scope="session")
-def api(event_loop: asyncio.AbstractEventLoop):
-    api = CurseAPI(os.environ["CF_API_KEY"], timeout=8)
-    yield api
-    event_loop.run_until_complete(api.close())
+@pytest.fixture(scope="session", params=[HttpxFactory, AiohttpFactory])
+async def api(request):
+    async with CurseAPI(os.environ["CF_API_KEY"], factory=request.param) as api:
+        yield api
+        await api.close()

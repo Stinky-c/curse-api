@@ -1,4 +1,4 @@
-from .api import APIFactory, CurseAPI
+from .api import CurseAPI
 from .enums import Games, ModLoaderType, ModsSearchSortField
 from .models import File, MinecraftGameVersion, Mod, Pagination
 
@@ -8,6 +8,5 @@ __all__ = [
     "File",
     "Games",
     "ModsSearchSortField",
-    "APIFactory",
     "ModLoaderType",
 ]

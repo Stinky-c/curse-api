@@ -6,6 +6,7 @@
 
 Built to serve CF endpoints while providing methods and functions to assist in finding the right mod.
 
+- Quick Install: `pip install curse-api[quick]`
 - [Features](#features)
 - [Quick Start](#quick-start)
 - [Examples](#examples)
@@ -15,37 +16,40 @@ Built to serve CF endpoints while providing methods and functions to assist in f
 ## Some backstory
 
 A while back when I was starting to learn python further then the basics I created a small tool to download Minecraft mods from a pack manifest.
-Soon after I wrote it the new API changes came and broke it. Now once more I want to return to that project idea and expand further. After first rewriting the project using [chili](https://pypi.org/project/chili/) it felt off, so returned to rewrite once more using [pydantic](https://pypi.org/project/pydantic/) for data validation and ease of access
+Soon after I wrote it the new API changes came and broke it. Now once more I want to return to that project idea and expand further. After first rewriting the project using [chili](https://pypi.org/project/chili/) it felt off, so returned to rewrite once more using [pydantic](https://pypi.org/project/pydantic/) for data validation and ease of access. This is mostly a pet project to learn further python.
 
 ----
 
 ## Features
 
-Main Dependencies:
+Main Dependency:
 
 - [Pydantic](https://pypi.org/project/pydantic/)
-- [HTTPX](https://pypi.org/project/httpx/)
+
+Native async library support:
+
+- [Aiohttp](https://pypi.org/project/aiohttp/) - `pip install curse-api[aiohttp]`
+- [Httpx](https://pypi.org/project/httpx/) - `pip install curse-api[httpx]`
 
 Currently implemented:
 
 - Important endpoint support
 - Full CurseForge model
 - Mediocre error handling
-- Shortcuts to download mods
-- Pluggable API factory
+- Pluggable API factories
 - Serialization and deserialization of models
-- Python 3.8 & 3.9 support
+- Python 3.7, 3.8 & 3.9 support
 - Async
 
 To Do:
 
 - Fix to be usable with pydantic based ORM's
 - Address all TODO's
-- Fully expose needed httpx args
-- Write more download handling code
 - Test other games too
+- Add more
 - Write docs
 - Update and fix error handling
+- Shortcuts to import clients
 
 CI/CD:
 
@@ -64,11 +68,13 @@ This example runs through most of the basics
 
 ```python
 from curse_api import CurseAPI
+from curse_api.clients.httpx import HttpxFactory
+import os
 import asyncio
 
 
 async def main():
-    async with CurseAPI(APIKEY) as api:
+    async with CurseAPI(os.environ["CF_API_KEY"], factory=HttpxFactory) as api:
 
         "Mods"
         a = await api.search_mods(searchFilter="JEI", slug="jei")
@@ -93,7 +99,6 @@ async def main():
 
 
 if __name__ == "__main__":
-    # Since this is an async wrapper we use asyncio to run our function 
     asyncio.run(main())
 ```
 
@@ -103,17 +108,22 @@ This example opens a properly named file in the current working directory and wr
 
 ```python
 from curse_api import CurseAPI
+from curse_api.clients.httpx import HttpxFactory
+import os
 import asyncio
 
 
 async def main():
-    async with CurseAPI(APIKEY) as api:
+    async with CurseAPI(os.environ["CF_API_KEY"], factory=HttpxFactory) as api:
 
+        # fetch the latest file from project with slug 'jei'
         mod_l, page_data = await api.search_mods(slug="jei")
         latest = mod_l[0].latestFiles[0]
 
         with open(latest.fileName, "wb") as f:
-            f.write(latest.download())
+            down = await api.download(latest.downloadUrl)  # type: ignore
+            async for b in down:
+                f.write(b)
 
 
 if __name__ == "__main__":
@@ -122,9 +132,11 @@ if __name__ == "__main__":
 ```
 
 ----
-Sub project / extension ideas:
+
+### Sub project / extension ideas
 
 - Modloader download and installation
 - Minecraft Version type / parser
 - MC pack installation
 - DB cache extension
+- Manifest parsing

@@ -1,13 +1,14 @@
 from curse_api import CurseAPI
+from curse_api.clients.httpx import HttpxFactory
 import os
 import asyncio
 
 
 async def main():
-    async with CurseAPI(os.environ["CF_API_KEY"]) as api:
+    async with CurseAPI(os.environ["CF_API_KEY"], factory=HttpxFactory) as api:
 
         "Mods"
-        a = await api.search_mods(searchFilter="JEI", slug="jei")
+        jei = await api.search_mods(searchFilter="JEI", slug="jei")
         # applies the search filters to the standard of CF docs
 
         mod = await api.get_mod(250398)  # returns a singular Mod

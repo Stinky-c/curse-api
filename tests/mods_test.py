@@ -4,11 +4,6 @@ from curse_api.enums import MinecraftCategories
 import pytest
 
 
-@pytest.mark.asyncio
-async def test_health_check(api: CurseAPI):
-    res = await api.health_check()
-    assert res.status_code == 200, "API unavailable"
-
 
 @pytest.mark.asyncio
 async def test_get_mod(api: CurseAPI):
