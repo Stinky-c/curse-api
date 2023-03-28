@@ -6,3 +6,4 @@
 - write tests for hooks
 - example code tests
 - tests for converting dict <-> models
+- more code coverage

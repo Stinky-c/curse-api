@@ -1,5 +1,4 @@
-from typing import Callable, List, Optional, Type, Tuple, Union, Dict, Any, TypeVar
-
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, TypeVar
 import httpx
 
 from .enums import (
@@ -10,6 +9,7 @@ from .enums import (
     SortOrder,
 )
 from .models import (
+    BaseCurseModel,
     File,
     FingerprintsMatchesResult,
     MinecraftGameVersion,
@@ -17,7 +17,6 @@ from .models import (
     MinecraftModLoaderVersion,
     Mod,
     Pagination,
-    BaseCurseModel,
 )
 
 """
@@ -101,7 +100,6 @@ class APIFactory:
         https://www.python-httpx.org/advanced/#event-hooks
         """
         self._sess.event_hooks["request"] += [func]
-        pass
 
     def pop_request_hooks(self) -> List[Callable]:
         """
