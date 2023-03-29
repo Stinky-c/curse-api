@@ -44,9 +44,6 @@ async def test_search_mods_category(api: CurseAPI):
         slug="multiblock-madness",
         categoryId=MinecraftCategories.Modpacks,
     )
-    
-    ...
-
 
 # TODO find API banned mod
 # async def test_invalid_mod_files(api:AsyncCurseAPI):

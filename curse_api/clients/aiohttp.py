@@ -1,9 +1,12 @@
 try:
     import aiohttp
+    from aiohttp.client import DEFAULT_TIMEOUT, ClientTimeout
 except ImportError:
-    raise Exception("HTTPX is not installed")
+    from ..errors import MissingImportException
 
-from typing import Dict, Any, Optional, AsyncIterator
+    raise MissingImportException("missing aiohttp")
+
+from typing import Any, AsyncIterator, Dict, Optional
 
 from ..abc import APIFactory
 
@@ -15,9 +18,15 @@ __all__ = [
 class AiohttpFactory(APIFactory):
     """An httpx impl for APIfactory"""
 
-    def __init__(self, api_key: str, base_url: str, user_agent: str) -> None:
-        """A basic factory handling API requests
-            CurseAPI will accept a subclass, but have `_get` and `_post` methods
+    def __init__(
+        self,
+        api_key: str,
+        base_url: str,
+        user_agent: str,
+        timeout: ClientTimeout = DEFAULT_TIMEOUT,
+    ) -> None:
+        """A basic factory handling API requests using aiohttp
+
 
 
         Args:
@@ -36,6 +45,7 @@ class AiohttpFactory(APIFactory):
         self._sess = aiohttp.ClientSession(
             base_url=base_url,
             headers=_headers,
+            timeout=timeout,
         )
         self._sess.trace_configs
 

@@ -24,10 +24,6 @@ schemas can be found at https://docs.curseforge.com/#schemas
 If exceptions to the format or naming conventions there will be a comment detailing the changes
 """
 
-# TODO: rewrite download handling code
-class APIBanned(Exception):
-    """In case a mod is banned from interacting with the API"""
-
 
 class BaseCurseModel(BaseModel):
     """The base for curseforge data"""
@@ -354,3 +350,15 @@ class Pagination(BaseCurseModel):
     pageSize: int
     resultCount: int
     totalCount: int
+
+
+# Manifest
+class ManifestMetadata(BaseCurseModel):  # TODO add more models
+    minecraft: dict
+    manifestType: str
+    manifestVersion: int
+    name: str
+    version: str
+    author: str
+    projectID: Optional[int]
+    overrides: str

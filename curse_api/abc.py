@@ -5,7 +5,7 @@ from typing import Any, Dict, Optional, AsyncIterator
 class APIFactory(metaclass=ABCMeta):
     """required types"""
 
-    def __init__(self, api_key: str, base_url: str, user_agent: str) -> None:
+    def __init__(self, api_key: str, base_url: str, user_agent: str, **kwargs) -> None:
         ...
 
     @abstractmethod
