@@ -1,4 +1,4 @@
-from curse_api import CurseAPI, ModLoaderType
+from curse_api import SimpleCurseAPI, ModLoaderType
 from curse_api.clients.httpx import HttpxFactory
 import os
 import asyncio
@@ -15,7 +15,7 @@ https://gist.github.com/bkbncn/85b845b955cc6b4eb1d12442fb56df25
 
 
 async def main():
-    async with CurseAPI(os.environ["CF_API_KEY"], factory=HttpxFactory) as api:
+    async with SimpleCurseAPI(os.environ["CF_API_KEY"], factory=HttpxFactory) as api:
 
         # gets modloader verion from curseforge
         versions = await api.modloader_versions()

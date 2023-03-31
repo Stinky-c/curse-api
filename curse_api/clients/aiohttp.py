@@ -21,8 +21,8 @@ class AiohttpFactory(APIFactory):
     def __init__(
         self,
         api_key: str,
-        base_url: str,
-        user_agent: str,
+        base_url: str = "https://api.curseforge.com",
+        user_agent: str = "stinky-c/curse-api",
         timeout: ClientTimeout = DEFAULT_TIMEOUT,
     ) -> None:
         """A basic factory handling API requests using aiohttp

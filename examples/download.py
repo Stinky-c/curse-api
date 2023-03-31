@@ -1,11 +1,11 @@
-from curse_api import CurseAPI
+from curse_api import SimpleCurseAPI
 from curse_api.clients.httpx import HttpxFactory
 import os
 import asyncio
 
 
 async def main():
-    async with CurseAPI(os.environ["CF_API_KEY"], factory=HttpxFactory) as api:
+    async with SimpleCurseAPI(os.environ["CF_API_KEY"], factory=HttpxFactory) as api:
 
         # fetch the latest file from project with slug 'jei'
         mod_l, page_data = await api.search_mods(slug="jei")

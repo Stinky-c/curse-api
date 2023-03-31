@@ -1,4 +1,4 @@
-from .api import CurseAPI
+from .api import CurseAPI, SimpleCurseAPI
 from .enums import Games, ModLoaderType, ModsSearchSortField
 from .models import File, MinecraftGameVersion, Mod, Pagination
 

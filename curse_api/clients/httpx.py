@@ -18,8 +18,8 @@ class HttpxFactory(APIFactory):
     def __init__(
         self,
         api_key: str,
-        base_url: str,
-        user_agent: str,
+        base_url: str = "https://api.curseforge.com",
+        user_agent: str = "stinky-c/curse-api",
         timeout: TimeoutTypes = DEFAULT_TIMEOUT_CONFIG,
     ) -> None:
         """A basic factory handling API requests using httpx

@@ -1,4 +1,3 @@
-from curse_api import CurseAPI
 from curse_api.ext import ManifestParser
 import pytest
 

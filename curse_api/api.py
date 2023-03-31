@@ -6,9 +6,9 @@ from typing import (
     Tuple,
     Type,
     TypeVar,
-    TYPE_CHECKING,
 )
 
+from .abc import APIFactory
 from .enums import (
     Games,
     MinecraftCategories,
@@ -27,9 +27,6 @@ from .models import (
     Pagination,
 )
 
-if TYPE_CHECKING:
-    from .abc import APIFactory
-
 """
 TODO: write more doc strings
 """
@@ -45,31 +42,22 @@ class CurseAPI:
 
     def __init__(
         self,
-        api_key: str,
-        factory: Type["APIFactory"],
-        base_url: str = "https://api.curseforge.com",
-        user_agent: str = "stinky-c/curse-api",
+        client: "APIFactory",
     ) -> None:
-        self._api: "APIFactory" = factory(
-            api_key=api_key, base_url=base_url, user_agent=user_agent
-        )
         """The main factory for handling requests
         accepts additional kwargs passing to the creation of the factory
 
         Args:
-            api_key (str): Required. get one from here: https://docs.curseforge.com/#accessing-the-service.
-            factory (APIFactory): a factory for handling API requests.
-            base_url (str, optional): An overide of the url base. Defaults to "https://api.curseforge.com".
-            user_agent (str, optional): user_agent used for requests. Defaults to "stinky-c/curse-api".
+            client: An instance of an client wrapper. Use `SimpleCurseAPI` to skip manual client instantiation.
+
         """
+        if not issubclass(type(client), APIFactory):
+            raise TypeError("factory or session must be provided")
+        self._api: "APIFactory" = client
 
     @property
     def api(self):
         return self._api
-
-    async def health_check(self):
-        res = await self._api.get("/")
-        return res
 
     async def minecraft_versions(self) -> List[MinecraftGameVersion]:
         """Returns all minecraft version data from curseforge.
@@ -247,3 +235,25 @@ class CurseAPI:
 
     async def __aexit__(self, *excinfo):
         await self.close()
+
+
+class SimpleCurseAPI(CurseAPI):
+    def __init__(
+        self,
+        api_key: str,
+        factory: Type["APIFactory"],
+        base_url: str = "https://api.curseforge.com",
+        user_agent: str = "stinky-c/curse-api",
+    ) -> None:
+        self._api: "APIFactory" = factory(
+            api_key=api_key, base_url=base_url, user_agent=user_agent
+        )
+        """The main factory for handling requests
+        accepts additional kwargs passing to the creation of the factory
+
+        Args:
+            api_key (str): Required. get one from here: https://docs.curseforge.com/#accessing-the-service.
+            factory (APIFactory): a factory for handling API requests.
+            base_url (str, optional): An overide of the url base. Defaults to "https://api.curseforge.com".
+            user_agent (str, optional): user_agent used for requests. Defaults to "stinky-c/curse-api".
+        """

@@ -1,4 +1,4 @@
-from curse_api import CurseAPI
+from curse_api import SimpleCurseAPI
 from curse_api.clients.httpx import HttpxFactory
 from curse_api.clients.aiohttp import AiohttpFactory
 from curse_api.ext import ManifestParser
@@ -20,11 +20,11 @@ def event_loop():
 
 @pytest.fixture(scope="session", params=[HttpxFactory, AiohttpFactory])
 async def api(request):
-    async with CurseAPI(os.environ["CF_API_KEY"], factory=request.param) as api:
+    async with SimpleCurseAPI(os.environ["CF_API_KEY"], factory=request.param) as api:
         yield api
         await api.close()
 
 
 @pytest.fixture(scope="session")
-async def manifest_parser(api: CurseAPI):
+async def manifest_parser(api: SimpleCurseAPI):
     yield ManifestParser(api)

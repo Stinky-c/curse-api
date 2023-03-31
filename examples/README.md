@@ -15,6 +15,10 @@ Minecraft manifest support coming soon
 
 A showcase with a simple example of subclassing the request handler
 
+## [Extending the API Factory](complex_API.py)
+
+A theoertical example of how other http clients could work
+
 ## [Serialization and Deserialization](dictionary_factory.py)
 
 A WIP example of serialization and deserialization of models
