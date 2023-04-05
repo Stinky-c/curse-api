@@ -1161,4 +1161,4 @@ quick = ["httpx"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.7"
-content-hash = "652c677fcbc2765ff1be578a81f66f649974752f229fb6eb60b9ee525057f961"
+content-hash = "838321d943131caed243594193c5fdd7767ef28c8cb3ce05b5db655b451bbf80"

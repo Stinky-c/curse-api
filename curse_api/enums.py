@@ -18,36 +18,34 @@ class SortOrder(Enum):
 
 
 class Games(IntEnum):
-    Minecraft = 432
-    Demeo = 78135
-    WildStar = 454
-    Chronicles_of_Arcadia = 70667
-    Sid_Meiers_Civilization_VI = 727
-    The_Secret_World = 64
-    The_Elder_Scrolls_Online = 455
-    Runes_of_Magic = 335
-    Secret_World_Legends = 4455
-    Among_Us = 69761
-    Darkest_Dungeon = 608
-    Kerbal_Space_Program = 4401
-    Terraria = 431
-    World_of_Tanks = 423
-    Minecraft_Dungeons = 69271
-    Stardew_Valley = 669
-    StarCraft_II = 65
-    Surviving_Mars = 61489
-    World_of_Warcraft = 1
-    Rift = 424
-
-
-class MinecraftCategories(IntEnum):
-    Worlds = 17
-    Bukkit_Plugins = 5
-    Customization = 4546
-    Modpacks = 4471
-    Resource_Packs = 12
-    Addons = 4559
-    Mods = 6
+    # Auto Generated Enum
+    demeo = 78135
+    wildstar = 454
+    chronicles_of_arcadia = 70667
+    final_fantasy_iii = 5026
+    rom = 335
+    civ6 = 727
+    final_fantasy_v = 5021
+    final_fantasy_i = 5230
+    teso = 455
+    sims4 = 78062
+    tsw = 64
+    among_us = 69761
+    minecraft = 432
+    final_fantasy_vi = 4773
+    swlegends = 4455
+    worldoftanks = 423
+    terraria = 431
+    darkestdungeon = 608
+    kerbal = 4401
+    stardewvalley = 669
+    final_fantasy_iv = 4741
+    wow = 1
+    minecraft_dungeons = 69271
+    sc2 = 65
+    surviving_mars = 61489
+    final_fantasy_ii = 5001
+    rift = 424
 
 
 class CoreApiStatus(IntEnum):
@@ -132,8 +130,7 @@ class ModLoaderInstallMethod(IntEnum):
     ForgeInstaller_v2 = 3
 
 
-class ModLoaderType(Enum):
-    Any_ = None
+class ModLoaderType(IntEnum):
     Any = 0
     Forge = 1
     Cauldron = 2

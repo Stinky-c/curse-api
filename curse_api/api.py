@@ -7,11 +7,12 @@ from typing import (
     Type,
     TypeVar,
 )
+from enum import Enum
+from .categories import BaseCategory
 
 from .abc import APIFactory
 from .enums import (
     Games,
-    MinecraftCategories,
     ModLoaderType,
     ModsSearchSortField,
     SortOrder,
@@ -34,6 +35,7 @@ TODO: write more doc strings
 U = TypeVar("U", bound=BaseCurseModel)
 
 
+# TODO: fix passing in enums
 class CurseAPI:
     """The main class for api requests.
     Cannot handle the download of API banned mods
@@ -93,9 +95,9 @@ class CurseAPI:
 
     async def search_mods(
         self,
-        gameId: Games = Games.Minecraft,
+        gameId: Games = Games.minecraft,
         classId: Optional[int] = None,
-        categoryId: Optional[MinecraftCategories] = None,
+        categoryId: Optional[BaseCategory] = None,
         gameVersion: Optional[str] = None,
         searchFilter: Optional[str] = None,
         sortField: Optional[ModsSearchSortField] = None,
@@ -110,7 +112,7 @@ class CurseAPI:
 
 
         Args:
-            gameId (Games, optional): Filter by game id. Defaults to `Games.Minecraft`.
+            gameId (Games, optional): Filter by game id. Defaults to `Games.minecraft`.
             classId (int, optional): Filter by section id (discoverable via Categories). Defaults to None.
             categoryId (MinecraftCategories, optional): Filter by category id. Defaults to None.
             gameVersion (str, optional): Filter by game version string. Defaults to None.
@@ -213,6 +215,10 @@ class CurseAPI:
     async def get_mod_file_download_url(self, modId: int, fileId: int) -> str:
         res = await self._api.get(f"/v1/mods/{modId}/files/{fileId}/download-url")
         return res["data"]
+
+    async def get_games(self) -> Enum:
+        res = await self.api.get("/v1/games")
+        return Enum("Games", {i["slug"]: i["id"] for i in res["data"]})
 
     async def close(self):
         return await self._api.close()

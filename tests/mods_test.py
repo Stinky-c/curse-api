@@ -1,6 +1,6 @@
 from curse_api import Games, SimpleCurseAPI
 from curse_api.models import Mod, Pagination
-from curse_api.enums import MinecraftCategories
+from curse_api.categories import Minecraft_Categories
 import pytest
 
 
@@ -24,7 +24,7 @@ async def test_get_mods(api: SimpleCurseAPI):
 
 @pytest.mark.asyncio
 async def test_search_mods_slug(api: SimpleCurseAPI):
-    res, page = await api.search_mods(Games.Minecraft, slug="jei")
+    res, page = await api.search_mods(Games.minecraft, slug="jei")
     assert isinstance(res, list), "Not a list"
     assert len(res) > 0, "No mods in list"
     assert isinstance(page, Pagination), "Invalid Pagination"
@@ -32,7 +32,7 @@ async def test_search_mods_slug(api: SimpleCurseAPI):
 
 @pytest.mark.asyncio
 async def test_search_mods_page_size(api: SimpleCurseAPI):
-    res, page = await api.search_mods(Games.Minecraft, slug="jei", pageSize=5)
+    res, page = await api.search_mods(Games.minecraft, slug="jei", pageSize=5)
     assert page.pageSize <= 5, "Page data is too long"
     assert page.resultCount == len(res), "The api returned invalid page data"
 
@@ -40,9 +40,9 @@ async def test_search_mods_page_size(api: SimpleCurseAPI):
 @pytest.mark.asyncio
 async def test_search_mods_category(api: SimpleCurseAPI):
     res, _ = await api.search_mods(
-        Games.Minecraft,
+        Games.minecraft,
         slug="multiblock-madness",
-        categoryId=MinecraftCategories.Modpacks,
+        categoryId=Minecraft_Categories.modpacks,
     )
 
 # TODO find API banned mod

@@ -17,7 +17,9 @@ from .enums import (
     ModLoaderInstallMethod,
     ModLoaderType,
     ModStatus,
+    Games,
 )
+from .categories import CATEGORIES, BaseCategory
 
 """
 schemas can be found at https://docs.curseforge.com/#schemas
@@ -306,7 +308,7 @@ class Mod(BaseCurseModel):
     """
 
     id: int
-    gameId: int
+    gameId: Games
     name: str
     slug: str
     links: ModLinks
@@ -316,7 +318,7 @@ class Mod(BaseCurseModel):
     isFeatured: bool
     primaryCategoryId: int
     categories: List[Category]
-    classId: int
+    classId: Optional[int]  # cf can return a null classId
     authors: List[ModAuthor]
     logo: ModAsset
     screenshots: List[ModAsset]
@@ -326,10 +328,22 @@ class Mod(BaseCurseModel):
     dateCreated: datetime
     dateModified: datetime
     dateReleased: datetime
-    allowModDistribution: Optional[bool]
+    allowModDistribution: Optional[bool]  # cf can still return a null here
     gamePopularityRank: int
     isAvailable: bool
     thumbsUpCount: int
+
+    @property
+    def category(self) -> Optional[BaseCategory]:
+        """This is a conveince method to look up the category belonging to a game
+        slugs can be created by replace underscores with dashes
+        `.replace("_","-")`
+
+        """
+        if not self.classId:
+            return None
+
+        return CATEGORIES[Games(self.gameId)](self.classId)
 
 
 # misc
