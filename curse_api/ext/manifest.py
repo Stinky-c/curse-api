@@ -1,11 +1,12 @@
 from __future__ import annotations
 from typing import Dict, Any, TYPE_CHECKING, List
-from ..models import File, ManifestMetadata
+from ..models import File, ManifestMetadata, Mod
 
 if TYPE_CHECKING:
     from ..api import CurseAPI
 
 AnyDict = Dict[Any, Any]
+
 
 # TODO: custom manifest creator
 class ManifestParser:
@@ -19,6 +20,14 @@ class ManifestParser:
 
         fids = [i["fileID"] for i in files]
         return await self.api.get_files(fids)
+
+    async def load_mods(self, data: AnyDict) -> List[Mod]:
+        files = data.get("files", None)
+        if not isinstance(files, list):
+            raise TypeError("Files is not list")
+
+        fids = [i["projectID"] for i in files]
+        return await self.api.get_mods(fids)
 
     async def load_modloader(self, data: AnyDict):  # TODO: type better
         minecraft = data.get("minecraft")

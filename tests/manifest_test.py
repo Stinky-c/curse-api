@@ -1,8 +1,9 @@
 from curse_api.ext import ManifestParser
 import pytest
+from typing import Dict, Any
 
 
-MANIFEST = {
+MANIFEST: Dict[Any, Any] = {
     "minecraft": {
         "version": "1.16.5",
         "modLoaders": [{"id": "forge-36.1.31", "primary": True}],
@@ -26,9 +27,16 @@ async def test_metadata(manifest_parser: ManifestParser):
 @pytest.mark.asyncio
 async def test_files(manifest_parser: ManifestParser):
     files = await manifest_parser.load_files(MANIFEST)
-    excpected = MANIFEST["files"][0]  # type: ignore
-    assert files[0].id == excpected["fileID"], " got unexpected file id"
-    assert files[0].modId == excpected["projectID"], " got unexpected project id"
+    expected = MANIFEST["files"][0]
+    assert files[0].id == expected["fileID"], " got unexpected file id"
+    assert files[0].modId == expected["projectID"], " got unexpected project id"
+
+
+@pytest.mark.asyncio
+async def test_mods(manifest_parser: ManifestParser):
+    mods = await manifest_parser.load_mods(MANIFEST)
+    expected = MANIFEST["files"][0]
+    assert mods[0].id == expected["projectID"], "Got wrong project"
 
 
 @pytest.mark.asyncio
@@ -41,4 +49,3 @@ async def test_modloader(manifest_parser: ManifestParser):
     assert (
         modloader.name == excepted["modLoaders"][0]["id"]  # type:ignore
     ), "invalid modloader name & version"
-
