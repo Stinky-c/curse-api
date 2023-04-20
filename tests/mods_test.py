@@ -4,7 +4,6 @@ from curse_api.categories import Minecraft_Categories
 import pytest
 
 
-
 @pytest.mark.asyncio
 async def test_get_mod(api: SimpleCurseAPI):
     id = 285109
@@ -44,6 +43,27 @@ async def test_search_mods_category(api: SimpleCurseAPI):
         slug="multiblock-madness",
         categoryId=Minecraft_Categories.modpacks,
     )
+
+
+@pytest.mark.asyncio
+async def test_mod_page_url(api: SimpleCurseAPI):
+    mcmod = await api.get_mod(388909)
+    assert (
+        mcmod.modPageURL == "https://www.curseforge.com/minecraft/mc-mods/explosiont"
+    ), "Invalid Minecraft Mod Page URL"
+
+    wowmod = await api.get_mod(688930)
+    assert (
+        wowmod.modPageURL
+        == "https://www.curseforge.com/wow/addons/advanced-raid-frame-settings"
+    ), "Invalid WoW Mod Page URL"
+
+    simsmod = await api.get_mod(810784)
+    assert (
+        simsmod.modPageURL
+        == "https://www.curseforge.com/sims4/build-buy/garden-at-home-pack"
+    ), "Invalid Sims Mod Page URL"
+
 
 # TODO find API banned mod
 # async def test_invalid_mod_files(api:AsyncSimpleCurseAPI):

@@ -345,6 +345,15 @@ class Mod(BaseCurseModel):
 
         return CATEGORIES[Games(self.gameId)](self.classId)
 
+    @property
+    def modPageURL(self) -> Optional[str]:
+        """Attempts to return the mods CurseForge page"""
+        return (
+            f"https://www.curseforge.com/{self.gameId.name.replace('_','-')}/{self.category.name.replace('_','-')}/{self.slug}"
+            if self.category
+            else None
+        )
+
 
 # misc
 
